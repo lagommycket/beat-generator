@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6ef">
+  <title>Pulse | Rhythm Trainer</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <style>
+:root {
+  color-scheme: light;
+  --paper: #f5f6ef;
+  --ink: #1d2925;
+  --muted: #78817a;
+  --line: #dce1d8;
+  --green: #237b57;
+  --green-soft: #e2eee5;
+  --coral: #c85f48;
+  --coral-soft: #f6e5df;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --sans: 'Avenir Next', Avenir, 'Trebuchet MS', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { min-width: 320px; background: var(--paper); }
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  background-color: var(--paper);
+  background-image: radial-gradient(#d7ddd2 0.7px, transparent 0.7px);
+  background-size: 15px 15px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button { color: inherit; font: inherit; }
+button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(100% - 48px, 600px);
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+.topline, footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topline { height: 82px; border-bottom: 1px solid var(--line); }
+
+.wordmark {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 18px;
+  height: 18px;
+  border: 5px solid var(--green);
+  border-radius: 50%;
+  box-shadow: 7px 0 0 -2px var(--coral);
+}
+
+.meter-label, .footer-mark {
+  color: var(--muted);
+  font: 10px var(--mono);
+  letter-spacing: 0;
+}
+
+.meter-label span { padding: 0 4px; color: var(--coral); }
+
+.practice { flex: 1; padding: 50px 0 34px; }
+
+.phase-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 21px; }
+
+.phase-indicator { display: inline-flex; gap: 9px; align-items: center; color: var(--green); }
+.phase-indicator.your-turn { color: var(--coral); }
+.phase-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.phase-name { font: 500 12px var(--mono); letter-spacing: 0; }
+.bar-position { color: var(--muted); font: 11px var(--mono); }
+
+.timeline-wrap {
+  position: relative;
+  padding-top: 27px;
+  padding-bottom: 22px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.grid-labels {
+  position: absolute;
+  inset: 6px 0 auto;
+  display: grid;
+  height: 13px;
+  grid-template-columns: repeat(var(--step-count, 4), minmax(0, 1fr));
+  color: #748078;
+  font: 10px var(--mono);
+  text-align: center;
+}
+
+.timeline { position: relative; display: grid; min-height: 96px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.beat-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-right: 1px solid var(--line); }
+.beat-group:last-child { border-right: 0; }
+.subdivision {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  border-right: 1px dotted #e1e4dc;
+}
+.subdivision:last-child { border-right: 0; }
+.note-marker {
+  display: none;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #35443c;
+}
+.subdivision.is-hit .note-marker { display: block; }
+.subdivision.is-sounding .note-marker {
+  width: 26px;
+  height: 26px;
+  background: var(--green);
+  box-shadow: 0 0 0 5px var(--green-soft), 0 0 15px #237b5740;
+}
+.playhead {
+  position: absolute;
+  z-index: 2;
+  top: -5px;
+  bottom: -7px;
+  left: 0;
+  width: 2px;
+  background: var(--green);
+  opacity: 0;
+  pointer-events: none;
+}
+.your-turn-mode .playhead { background: var(--coral); }
+
+.settings { padding-top: 22px; }
+.setting-row {
+  display: flex;
+  min-height: 61px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.setting-label { color: #45514a; font-size: 13px; font-weight: 600; }
+
+.stepper { display: flex; align-items: center; gap: 13px; }
+.stepper button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #d5dbd2;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+  touch-action: manipulation;
+}
+.stepper button:hover:not(:disabled) { border-color: var(--green); background: white; }
+.stepper button:active:not(:disabled) { transform: scale(.93); }
+.stepper button:disabled { opacity: .35; cursor: default; }
+.stepper output { min-width: 26px; color: var(--ink); text-align: center; font: 12px var(--mono); }
+.tempo-stepper { gap: 11px; }
+.tempo-stepper output { min-width: 74px; font-size: 13px; }
+.tempo-stepper small { color: var(--muted); font: 10px var(--mono); }
+
+.feel-control {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #d5dbd2;
+  border-radius: 4px;
+}
+.feel-control button {
+  min-height: 31px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 10px var(--mono);
+  touch-action: manipulation;
+}
+.feel-control button[aria-pressed="true"] { background: white; color: var(--green); box-shadow: 0 1px 3px #1d29251a; }
+
+.toggle {
+  display: inline-flex;
+  gap: 10px;
+  min-width: 78px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 0 8px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  cursor: pointer;
+  font: 11px var(--mono);
+  touch-action: manipulation;
+}
+.toggle[aria-pressed="false"] { color: var(--muted); }
+.toggle-track { display: flex; width: 34px; height: 20px; align-items: center; padding: 2px; border: 1px solid currentColor; border-radius: 12px; }
+.toggle-track span { width: 14px; height: 14px; border-radius: 50%; background: currentColor; transition: transform 150ms ease; }
+.toggle[aria-pressed="true"] .toggle-track span { transform: translateX(14px); }
+
+.play-button {
+  display: flex;
+  width: 100%;
+  min-height: 66px;
+  gap: 13px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--green);
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  transition: background 150ms ease, transform 120ms ease;
+  touch-action: manipulation;
+}
+.play-button:hover { background: #1c6849; }
+.play-button:active { transform: scale(.99); }
+.play-icon { width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent; border-left: 10px solid white; }
+.play-button.is-playing { background: #263b32; }
+.play-button.is-playing .play-icon { width: 10px; height: 14px; border: 0; border-right: 3px solid white; border-left: 3px solid white; }
+
+.keyboard-hint { display: flex; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+.keyboard-hint > span { padding: 0 3px; color: #b0b6ad; }
+kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; color: #59645d; font: 9px var(--mono); }
+
+footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+
+@media (max-width: 520px) {
+  .app-shell { width: min(100% - 36px, 440px); }
+  .topline { height: 68px; }
+  .practice { padding-top: 35px; }
+  .setting-row { min-height: 59px; }
+  .stepper { gap: 10px; }
+  .stepper button { width: 40px; height: 40px; }
+  .setting-label { font-size: 12px; }
+  .feel-control button { padding: 0 7px; font-size: 9px; }
+  .play-button { min-height: 70px; margin-top: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topline">
+      <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
+      <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+    </header>
+
+    <section class="practice" aria-label="Rhythm practice">
+      <div class="phase-row">
+        <div class="phase-indicator listen-phase" id="phase-indicator" aria-live="polite">
+          <span class="phase-dot" aria-hidden="true"></span>
+          <span class="phase-name" id="phase-name">LISTEN</span>
+        </div>
+        <span class="bar-position" id="bar-position">Bar 1 / 1</span>
+      </div>
+
+      <div class="timeline-wrap" id="timeline-wrap" aria-label="Rhythm timeline">
+        <div class="grid-labels" id="grid-labels" aria-hidden="true"></div>
+        <div class="timeline" id="timeline" role="img" aria-label="Generated rhythm"></div>
+      </div>
+
+      <div class="settings" aria-label="Practice settings">
+        <div class="setting-row">
+          <span class="setting-label">Complexity</span>
+          <div class="stepper" role="group" aria-label="Complexity">
+            <button type="button" data-control="complexity" data-delta="-1" aria-label="Decrease complexity">−</button>
+            <output id="complexity-value" for="complexity-minus complexity-plus">1</output>
+            <button type="button" data-control="complexity" data-delta="1" aria-label="Increase complexity">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Pause / Repeat bars</span>
+          <div class="stepper" role="group" aria-label="Pause / Repeat bars">
+            <button type="button" data-control="pauseBars" data-delta="-1" aria-label="Decrease repeat bars">−</button>
+            <output id="pause-bars-value">1</output>
+            <button type="button" data-control="pauseBars" data-delta="1" aria-label="Increase repeat bars">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Repeat same rhythm</span>
+          <div class="stepper" role="group" aria-label="Repeat same rhythm">
+            <button type="button" data-control="repeatCount" data-delta="-1" aria-label="Decrease rhythm repeats">−</button>
+            <output id="repeat-count-value">1</output>
+            <button type="button" data-control="repeatCount" data-delta="1" aria-label="Increase rhythm repeats">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Feel</span>
+          <div class="feel-control" role="group" aria-label="Rhythm feel">
+            <button type="button" data-feel="straight" aria-pressed="true">Straight</button>
+            <button type="button" data-feel="swing" aria-pressed="false">Swing</button>
+            <button type="button" data-feel="shuffle" aria-pressed="false">Shuffle</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Metronome</span>
+          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row tempo-row">
+          <span class="setting-label">Tempo</span>
+          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
+            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
+            <output id="tempo-value">100 <small>BPM</small></output>
+            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="play-button" id="play-button" type="button" aria-label="Start rhythm training">
+        <span class="play-icon" aria-hidden="true"></span>
+        <span id="play-label">PLAY</span>
+      </button>
+      <p class="keyboard-hint"><kbd>Space</kbd> play / pause <span>·</span> <kbd>↑</kbd><kbd>↓</kbd> tempo</p>
+    </section>
+    <footer><span>Listen close. Find the pulse.</span><span class="footer-mark">P—01</span></footer>
+  </main>
+<script>
+const state = {
+  tempo: 100,
+  complexity: 1,
+  feel: 'straight',
+  pauseBars: 1,
+  repeatCount: 1,
+  metronome: true,
+  playing: false,
+  rhythm: [],
+};
+
+const rhythmGenerator = {
+  generate(level, feel) {
+    const hits = new Array(16).fill(false);
+    const chance = (value) => Math.random() < value;
+
+    if (level === 1) {
+      for (let beat = 0; beat < 4; beat += 1) hits[beat * 4] = chance(0.7);
+      if (hits.filter(Boolean).length < 2) {
+        hits[0] = true;
+        hits[8] = true;
+      }
+    } else {
+      const downbeatChance = level === 2 ? 0.72 : level === 3 ? 0.66 : 0.62;
+      const eighthChance = level === 2 ? 0.22 : level === 3 ? 0.38 : level === 4 ? 0.31 : 0.4;
+      const sixteenthChance = level === 4 ? 0.13 : level === 5 ? 0.2 : 0;
+
+      for (let beat = 0; beat < 4; beat += 1) {
+        const base = beat * 4;
+        hits[base] = chance(downbeatChance);
+        hits[base + 2] = chance(eighthChance);
+        if (sixteenthChance) {
+          hits[base + 1] = chance(sixteenthChance);
+          hits[base + 3] = chance(sixteenthChance);
+        }
+      }
+
+      if (level >= 3 && !hits.some((hit, index) => hit && index % 4 !== 0)) {
+        hits[level === 3 ? 6 : 5] = true;
+      }
+      if (hits.filter(Boolean).length < 2) {
+        hits[0] = true;
+        hits[8] = true;
+      }
+      if (level === 5 && hits.filter(Boolean).length > 11) {
+        const onsets = hits.map((hit, index) => hit ? index : -1).filter((index) => index >= 0);
+        for (const index of onsets.slice(10)) hits[index] = false;
+      }
+    }
+
+    const offbeatPositions = [2, 6, 10, 14];
+    if (!offbeatPositions.some((position) => hits[position])) {
+      if (level === 5 && hits.filter(Boolean).length >= 11) {
+        const removable = hits.findIndex((hit, index) => hit && index % 4 !== 0);
+        if (removable >= 0) hits[removable] = false;
+      }
+      const position = offbeatPositions[Math.floor(Math.random() * offbeatPositions.length)];
+      hits[position] = true;
+    }
+
+    const swingRatio = feel === 'swing' ? 0.6 : feel === 'shuffle' ? 2 / 3 : null;
+    const positions = hits.flatMap((hit, subdivision) => {
+      if (!hit) return [];
+      const beat = Math.floor(subdivision / 4);
+      const part = subdivision % 4;
+      return [part === 2 && swingRatio !== null ? beat + swingRatio : subdivision / 4];
+    });
+    return positions.map((position, index) => {
+      const nextPosition = positions[index + 1] ?? 4;
+      return {
+        position,
+        duration: Math.min(1, nextPosition - position),
+        scheduledAudioTime: null,
+        soundDuration: 0,
+      };
+    });
+  },
+};
+
+const audioEngine = {
+  context: null,
+  unlocked: false,
+  activeSources: new Set(),
+
+  async resume() {
+    if (this.context?.state === 'closed') {
+      this.context = null;
+      this.unlocked = false;
+    }
+    if (!this.context) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
+      this.context = new AudioContextClass();
+    }
+    const context = this.context;
+    if (!this.unlocked || context.state !== 'running') {
+      const source = context.createBufferSource();
+      source.buffer = context.createBuffer(1, 1, context.sampleRate);
+      source.connect(context.destination);
+      source.start(0);
+      this.unlocked = true;
+    }
+    if (context.state !== 'running') await context.resume();
+    if (context.state !== 'running') throw new Error('AudioContext could not be resumed.');
+    return context;
+  },
+
+  tone(time, frequency, volume, type, duration) {
+    const context = this.context;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, time);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(volume, time + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.addEventListener('ended', () => this.activeSources.delete(oscillator), { once: true });
+    this.activeSources.add(oscillator);
+    oscillator.start(time);
+    oscillator.stop(time + duration + 0.01);
+  },
+
+  click(time, accented) {
+    this.tone(time, accented ? 1250 : 930, accented ? 0.035 : 0.021, 'sine', 0.045);
+  },
+
+  hit(time, duration) {
+    this.tone(time, 620, 0.13, 'triangle', duration);
+  },
+
+  stopAll() {
+    for (const source of this.activeSources) {
+      try { source.stop(); } catch { /* The source may already have ended. */ }
+    }
+    this.activeSources.clear();
+  },
+};
+
+const scheduler = {
+  intervalId: null,
+  nextBeatTime: 0,
+  segment: null,
+  segments: [],
+  lookahead: 0.12,
+
+  start(startTime) {
+    this.segments = [];
+    this.segment = null;
+    this.nextBeatTime = startTime;
+    this.startBar(startTime, 'countin', 1, 1, state.rhythm, 1, state.repeatCount, state.pauseBars);
+    this.intervalId = window.setInterval(() => this.tick(), 25);
+    this.tick();
+  },
+
+  stop() {
+    if (this.intervalId !== null) window.clearInterval(this.intervalId);
+    this.intervalId = null;
+    this.segment = null;
+    this.segments = [];
+  },
+
+  startBar(startTime, kind, bar, total, rhythm, cycle, cycleTotal, turnTotal) {
+    this.segment = {
+      kind,
+      bar,
+      total,
+      rhythm,
+      cycle,
+      cycleTotal,
+      turnTotal,
+      startTime,
+      endTime: null,
+      beatTimes: [startTime],
+      beat: 0,
+    };
+    this.segments.push(this.segment);
+    if (this.segments.length > 64) this.segments.shift();
+  },
+
+  tick() {
+    if (!state.playing || !audioEngine.context) return;
+    const horizon = audioEngine.context.currentTime + this.lookahead;
+    while (this.nextBeatTime < horizon) this.scheduleBeat(this.nextBeatTime);
+  },
+
+  scheduleBeat(time) {
+    const segment = this.segment;
+    if (!segment) return;
+    const beat = segment.beat;
+    const beatDuration = 60 / state.tempo;
+    segment.beatTimes[beat + 1] = time + beatDuration;
+
+    if (state.metronome) audioEngine.click(time, beat === 0);
+    if (segment.kind === 'listen') {
+      for (const event of segment.rhythm) {
+        if (event.position < beat || event.position >= beat + 1) continue;
+        const eventTime = time + (event.position - beat) * beatDuration;
+        event.scheduledAudioTime = eventTime;
+        event.soundDuration = Math.min(0.12, event.duration * beatDuration * 0.8);
+        audioEngine.hit(eventTime, event.soundDuration);
+      }
+    }
+
+    segment.beat += 1;
+    this.nextBeatTime = time + beatDuration;
+    if (segment.beat === 4) this.advance(segment, this.nextBeatTime);
+  },
+
+  advance(segment, nextStart) {
+    segment.endTime = nextStart;
+    if (segment.kind === 'countin') {
+      this.startBar(nextStart, 'listen', 1, 1, segment.rhythm, segment.cycle, segment.cycleTotal, segment.turnTotal);
+    } else if (segment.kind === 'listen') {
+      this.startBar(nextStart, 'turn', 1, segment.turnTotal, segment.rhythm, segment.cycle, segment.cycleTotal, segment.turnTotal);
+    } else if (segment.bar < segment.total) {
+      this.startBar(nextStart, 'turn', segment.bar + 1, segment.total, segment.rhythm, segment.cycle, segment.cycleTotal, segment.turnTotal);
+    } else if (segment.cycle < segment.cycleTotal) {
+      this.startBar(nextStart, 'listen', 1, 1, segment.rhythm, segment.cycle + 1, segment.cycleTotal, segment.turnTotal);
+    } else {
+      this.startBar(nextStart, 'listen', 1, 1, rhythmGenerator.generate(state.complexity, state.feel), 1, state.repeatCount, state.pauseBars);
+    }
+  },
+
+  segmentAt(time) {
+    for (let index = this.segments.length - 1; index >= 0; index -= 1) {
+      const segment = this.segments[index];
+      if (time >= segment.startTime && (segment.endTime === null || time < segment.endTime)) return segment;
+    }
+    return null;
+  },
+};
+
+const visualizer = {
+  cells: [],
+  playhead: null,
+  animationId: null,
+
+  init() {
+    const timeline = document.getElementById('timeline');
+    this.playhead = document.createElement('span');
+    this.playhead.className = 'playhead';
+    this.playhead.setAttribute('aria-hidden', 'true');
+    this.cells = [];
+    for (let beat = 0; beat < 4; beat += 1) {
+      const group = document.createElement('div');
+      group.className = 'beat-group';
+      for (let part = 0; part < 4; part += 1) {
+        const cell = document.createElement('div');
+        cell.className = 'subdivision';
+        const marker = document.createElement('span');
+        marker.className = 'note-marker';
+        marker.setAttribute('aria-hidden', 'true');
+        cell.append(marker);
+        group.append(cell);
+        this.cells.push(cell);
+      }
+      timeline.append(group);
+    }
+    timeline.append(this.playhead);
+    this.renderRhythm();
+    this.animationId = window.requestAnimationFrame(() => this.frame());
+  },
+
+  renderRhythm(rhythm = state.rhythm) {
+    const labels = document.getElementById('grid-labels');
+    const stepCount = state.complexity === 1 ? 4 : state.complexity <= 3 ? 8 : 16;
+    const partsPerBeat = stepCount / 4;
+    labels.replaceChildren();
+    labels.style.setProperty('--step-count', stepCount);
+
+    for (let step = 0; step < stepCount; step += 1) {
+      const label = document.createElement('span');
+      const beat = Math.floor(step / partsPerBeat) + 1;
+      const part = step % partsPerBeat;
+      label.textContent = partsPerBeat === 1 ? String(beat) : partsPerBeat === 2 ? (part === 0 ? String(beat) : '&') : ['','e','&','a'][part] || String(beat);
+      if (partsPerBeat === 4 && part === 0) label.textContent = String(beat);
+      labels.append(label);
+    }
+
+    this.cells.forEach((cell) => {
+      cell.rhythmEvent = null;
+      cell.classList.remove('is-hit', 'is-sounding');
+    });
+    rhythm.forEach((event) => {
+      const cell = this.cells[Math.round(event.position * 4)];
+      if (!cell) return;
+      cell.rhythmEvent = event;
+      cell.classList.add('is-hit');
+    });
+  },
+
+  frame() {
+    const now = audioEngine.context?.currentTime ?? 0;
+    const segment = state.playing ? scheduler.segmentAt(now) : null;
+    const rhythm = segment?.rhythm ?? state.rhythm;
+    if (rhythm !== state.rhythm) {
+      state.rhythm = rhythm;
+      this.renderRhythm(rhythm);
+    }
+    document.getElementById('phase-indicator').classList.toggle('your-turn', segment?.kind === 'turn');
+    document.getElementById('timeline-wrap').classList.toggle('your-turn-mode', segment?.kind === 'turn');
+    const listening = segment?.kind === 'listen';
+    this.cells.forEach((cell) => {
+      const event = cell.rhythmEvent;
+      const sounding = listening && event?.scheduledAudioTime !== null && event?.scheduledAudioTime !== undefined && now >= event.scheduledAudioTime && now < event.scheduledAudioTime + event.soundDuration;
+      cell.classList.toggle('is-sounding', sounding);
+    });
+
+    if (segment) {
+      document.getElementById('phase-name').textContent = segment.kind === 'turn' ? 'YOUR TURN' : 'LISTEN';
+      const repeatLabel = segment.cycleTotal > 1 ? `Repeat ${segment.cycle} / ${segment.cycleTotal} · ` : '';
+      document.getElementById('bar-position').textContent = `${repeatLabel}Bar ${segment.bar} / ${segment.total}`;
+      let beat = 0;
+      while (beat < 3 && now >= (segment.beatTimes[beat + 1] ?? Infinity)) beat += 1;
+      const beatStart = segment.beatTimes[beat] ?? segment.startTime;
+      const beatEnd = segment.beatTimes[beat + 1] ?? beatStart + 60 / state.tempo;
+      const fraction = Math.min(0.999, Math.max(0, (now - beatStart) / (beatEnd - beatStart)));
+      this.playhead.style.left = `${((beat + fraction) / 4) * 100}%`;
+      this.playhead.style.opacity = '1';
+    } else {
+      document.getElementById('phase-name').textContent = 'LISTEN';
+      document.getElementById('bar-position').textContent = 'Bar 1 / 1';
+      this.playhead.style.opacity = '0';
+    }
+
+    this.animationId = window.requestAnimationFrame(() => this.frame());
+  },
+};
+
+const controls = {
+  init() {
+    document.querySelectorAll('[data-control]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.control;
+        const delta = Number(button.dataset.delta);
+        const limits = { complexity: [1, 5], pauseBars: [1, 8], repeatCount: [1, 8], tempo: [40, 220] };
+        state[key] = Math.min(limits[key][1], Math.max(limits[key][0], state[key] + delta));
+        if (key === 'complexity' && !state.playing) {
+          state.rhythm = rhythmGenerator.generate(state.complexity, state.feel);
+          visualizer.renderRhythm();
+        }
+        this.render();
+      });
+    });
+
+    document.querySelectorAll('[data-feel]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.feel = button.dataset.feel;
+        if (!state.playing) {
+          state.rhythm = rhythmGenerator.generate(state.complexity, state.feel);
+          visualizer.renderRhythm();
+        }
+        this.render();
+      });
+    });
+
+    document.getElementById('metronome-toggle').addEventListener('click', (event) => {
+      state.metronome = !state.metronome;
+      event.currentTarget.setAttribute('aria-pressed', String(state.metronome));
+      document.getElementById('metronome-value').textContent = state.metronome ? 'ON' : 'OFF';
+    });
+
+    document.getElementById('play-button').addEventListener('click', () => this.togglePlayback());
+    document.addEventListener('keydown', (event) => {
+      const target = event.target;
+      const isInteractive = target instanceof HTMLElement && (target.isContentEditable || /^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(target.tagName));
+      if (event.code === 'Space' && !isInteractive) {
+        event.preventDefault();
+        this.togglePlayback();
+      } else if (!isInteractive && event.key === 'ArrowUp') {
+        event.preventDefault();
+        state.tempo = Math.min(220, state.tempo + 5);
+        this.render();
+      } else if (!isInteractive && event.key === 'ArrowDown') {
+        event.preventDefault();
+        state.tempo = Math.max(40, state.tempo - 5);
+        this.render();
+      }
+    });
+    this.render();
+  },
+
+  render() {
+    document.getElementById('complexity-value').textContent = state.complexity;
+    document.getElementById('pause-bars-value').textContent = state.pauseBars;
+    document.getElementById('repeat-count-value').textContent = state.repeatCount;
+    document.getElementById('tempo-value').innerHTML = `${state.tempo} <small>BPM</small>`;
+    document.querySelectorAll('[data-feel]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.feel === state.feel));
+    });
+    document.querySelectorAll('[data-control]').forEach((button) => {
+      const [minimum, maximum] = ({ complexity: [1, 5], pauseBars: [1, 8], repeatCount: [1, 8], tempo: [40, 220] })[button.dataset.control];
+      const value = state[button.dataset.control];
+      const delta = Number(button.dataset.delta);
+      button.disabled = delta < 0 ? value <= minimum : value >= maximum;
+    });
+  },
+
+  async togglePlayback() {
+    if (state.playing) {
+      state.playing = false;
+      scheduler.stop();
+      audioEngine.stopAll();
+      this.showPlaybackState(false);
+      return;
+    }
+
+    const button = document.getElementById('play-button');
+    button.disabled = true;
+    try {
+      const context = await audioEngine.resume();
+      state.playing = true;
+      scheduler.start(context.currentTime + 0.12);
+      visualizer.renderRhythm();
+      this.showPlaybackState(true);
+    } catch (error) {
+      document.getElementById('phase-name').textContent = 'AUDIO UNAVAILABLE';
+      console.error(error);
+    } finally {
+      button.disabled = false;
+    }
+  },
+
+  showPlaybackState(playing) {
+    const button = document.getElementById('play-button');
+    button.classList.toggle('is-playing', playing);
+    button.setAttribute('aria-label', playing ? 'Pause rhythm training' : 'Start rhythm training');
+    document.getElementById('play-label').textContent = playing ? 'PAUSE' : 'PLAY';
+  },
+};
+
+state.rhythm = rhythmGenerator.generate(state.complexity, state.feel);
+visualizer.init();
+controls.init();
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+</script>
+</body>
+</html>

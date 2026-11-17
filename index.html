@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6ef">
+  <title>Pulse | Rhythm Trainer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topline">
+      <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
+      <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+    </header>
+
+    <section class="practice" aria-label="Rhythm practice">
+      <div class="phase-row">
+        <div class="phase-indicator listen-phase" id="phase-indicator" aria-live="polite">
+          <span class="phase-dot" aria-hidden="true"></span>
+          <span class="phase-name" id="phase-name">LISTEN</span>
+        </div>
+        <span class="bar-position" id="bar-position">Bar 1 / 1</span>
+      </div>
+
+      <div class="timeline-wrap" id="timeline-wrap" aria-label="Rhythm timeline">
+        <div class="grid-labels" id="grid-labels" aria-hidden="true"></div>
+        <div class="timeline" id="timeline" role="img" aria-label="Generated rhythm"></div>
+      </div>
+
+      <div class="settings" aria-label="Practice settings">
+        <div class="setting-row">
+          <span class="setting-label">Complexity</span>
+          <div class="stepper" role="group" aria-label="Complexity">
+            <button type="button" data-control="complexity" data-delta="-1" aria-label="Decrease complexity">−</button>
+            <output id="complexity-value" for="complexity-minus complexity-plus">1</output>
+            <button type="button" data-control="complexity" data-delta="1" aria-label="Increase complexity">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Pause / Repeat bars</span>
+          <div class="stepper" role="group" aria-label="Pause / Repeat bars">
+            <button type="button" data-control="pauseBars" data-delta="-1" aria-label="Decrease repeat bars">−</button>
+            <output id="pause-bars-value">1</output>
+            <button type="button" data-control="pauseBars" data-delta="1" aria-label="Increase repeat bars">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Repeat same rhythm</span>
+          <div class="stepper" role="group" aria-label="Repeat same rhythm">
+            <button type="button" data-control="repeatCount" data-delta="-1" aria-label="Decrease rhythm repeats">−</button>
+            <output id="repeat-count-value">1</output>
+            <button type="button" data-control="repeatCount" data-delta="1" aria-label="Increase rhythm repeats">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Feel</span>
+          <div class="feel-control" role="group" aria-label="Rhythm feel">
+            <button type="button" data-feel="straight" aria-pressed="true">Straight</button>
+            <button type="button" data-feel="swing" aria-pressed="false">Swing</button>
+            <button type="button" data-feel="shuffle" aria-pressed="false">Shuffle</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Metronome</span>
+          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row tempo-row">
+          <span class="setting-label">Tempo</span>
+          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
+            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
+            <output id="tempo-value">100 <small>BPM</small></output>
+            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="play-button" id="play-button" type="button" aria-label="Start rhythm training">
+        <span class="play-icon" aria-hidden="true"></span>
+        <span id="play-label">PLAY</span>
+      </button>
+      <p class="keyboard-hint"><kbd>Space</kbd> play / pause <span>·</span> <kbd>↑</kbd><kbd>↓</kbd> tempo</p>
+    </section>
+    <footer><span>Listen close. Find the pulse.</span><span class="footer-mark">P—01</span></footer>
+  </main>
+</body>
+</html>

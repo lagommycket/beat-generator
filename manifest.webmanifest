@@ -1,0 +1,25 @@
+{
+  "name": "Pulse Rhythm Trainer",
+  "short_name": "Pulse",
+  "description": "A listen-and-repeat rhythm trainer.",
+  "start_url": "./htmlSite.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f6ef",
+  "theme_color": "#f5f6ef",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
