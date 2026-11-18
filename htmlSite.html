@@ -35,6 +35,7 @@ body {
   margin: 0;
   color: var(--ink);
   font-family: var(--sans);
+  font-size: 20.8px;
   background-color: var(--paper);
   background-image: radial-gradient(#d7ddd2 0.7px, transparent 0.7px);
   background-size: 15px 15px;
@@ -63,14 +64,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   justify-content: space-between;
 }
 
-.topline { flex-shrink: 0; height: 82px; border-bottom: 1px solid var(--line); }
+.topline { flex-shrink: 0; gap: 8px; height: 54px; border-bottom: 1px solid var(--line); }
 
 .wordmark {
   display: inline-flex;
   gap: 9px;
   align-items: center;
   color: var(--ink);
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: 0;
   text-decoration: none;
@@ -84,26 +85,27 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   box-shadow: 7px 0 0 -2px var(--coral);
 }
 
-.header-details { display: grid; gap: 6px; justify-items: end; }
-.app-version { color: var(--muted); font: 10px var(--mono); }
+.header-details { display: flex; flex-wrap: wrap; gap: 0 6px; min-width: 0; align-items: center; justify-content: flex-end; white-space: nowrap; }
+.app-version { color: var(--muted); font: 15.6px var(--mono); }
 
 .meter-label, .footer-mark {
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 15.6px var(--mono);
   letter-spacing: 0;
 }
 
-.meter-label span { padding: 0 4px; color: var(--coral); }
+.meter-label { font-size: 12px; }
+.meter-label span { padding: 0 1px; color: var(--coral); }
 
 .practice { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 24px 0 20px; }
 
-.phase-row { display: flex; flex-shrink: 0; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 21px; }
+.phase-row { display: flex; flex-shrink: 0; flex-wrap: wrap; gap: 4px 12px; align-items: center; justify-content: space-between; margin-bottom: 21px; }
 
 .phase-indicator { display: inline-flex; gap: 9px; align-items: center; color: var(--green); }
 .phase-indicator.your-turn { color: var(--coral); }
 .phase-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-.phase-name { font: 500 12px var(--mono); letter-spacing: 0; }
-.bar-position { color: var(--muted); font: 11px var(--mono); }
+.phase-name { font: 500 15.6px var(--mono); letter-spacing: 0; }
+.bar-position { color: var(--muted); font: 14.3px var(--mono); }
 
 .timeline-wrap {
   position: relative;
@@ -118,14 +120,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   position: absolute;
   inset: 6px 0 auto;
   display: grid;
-  height: 13px;
+  height: 17px;
   grid-template-columns: repeat(var(--step-count, 4), minmax(0, 1fr));
   color: #748078;
-  font: 10px var(--mono);
-  text-align: center;
+  font: 13px var(--mono);
+  text-align: left;
 }
 
-.timeline { position: relative; display: grid; min-height: 96px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.timeline { position: relative; display: grid; min-height: 96px; grid-template-columns: repeat(var(--beats-per-bar, 4), minmax(0, 1fr)); }
 .beat-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-right: 1px solid var(--line); }
 .beat-group:last-child { border-right: 0; }
 .subdivision {
@@ -167,12 +169,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .settings { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 12px 4px 0; margin: 0 -4px; }
 .setting-row {
   display: flex;
+  gap: 12px;
   min-height: 61px;
+  padding: 8px 0;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
 }
-.setting-label { color: #45514a; font-size: 13px; font-weight: 600; }
+.setting-label { min-width: 0; color: #45514a; font-size: 16.9px; font-weight: 600; }
 
 .sound-select {
   width: 158px;
@@ -183,12 +187,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   border-radius: 4px;
   background: var(--paper);
   color: var(--ink);
-  font: 16px var(--sans);
+  font: 20.8px var(--sans);
   touch-action: manipulation;
 }
 .sound-select:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
 
-.stepper { display: flex; align-items: center; gap: 13px; }
+.stepper { display: flex; flex-shrink: 0; align-items: center; gap: 13px; }
 .stepper button {
   display: grid;
   width: 36px;
@@ -199,7 +203,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 26px;
   line-height: 1;
   transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
   touch-action: manipulation;
@@ -207,13 +211,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .stepper button:hover:not(:disabled) { border-color: var(--green); background: white; }
 .stepper button:active:not(:disabled) { transform: scale(.93); }
 .stepper button:disabled { opacity: .35; cursor: default; }
-.stepper output { min-width: 26px; color: var(--ink); text-align: center; font: 12px var(--mono); }
+.stepper output { min-width: 26px; color: var(--ink); text-align: center; font: 15.6px var(--mono); }
 .tempo-stepper { gap: 11px; }
-.tempo-stepper output { min-width: 74px; font-size: 13px; }
-.tempo-stepper small { color: var(--muted); font: 10px var(--mono); }
+.tempo-stepper output { min-width: 74px; font-size: 16.9px; }
+.tempo-stepper small { color: var(--muted); font: 13px var(--mono); }
 
 .feel-control {
   display: inline-flex;
+  flex-shrink: 0;
   gap: 2px;
   padding: 3px;
   border: 1px solid #d5dbd2;
@@ -227,7 +232,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font: 10px var(--mono);
+  font: 13px var(--mono);
   touch-action: manipulation;
 }
 .feel-control button[aria-pressed="true"] { background: white; color: var(--green); box-shadow: 0 1px 3px #1d29251a; }
@@ -243,7 +248,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   background: transparent;
   color: var(--green);
   cursor: pointer;
-  font: 11px var(--mono);
+  font: 14.3px var(--mono);
   touch-action: manipulation;
 }
 .toggle[aria-pressed="false"] { color: var(--muted); }
@@ -265,7 +270,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   background: var(--green);
   color: white;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 16.9px;
   font-weight: 800;
   letter-spacing: 0;
   transition: background 150ms ease, transform 120ms ease;
@@ -277,26 +282,26 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .play-button.is-playing { background: #263b32; }
 .play-button.is-playing .play-icon { width: 10px; height: 14px; border: 0; border-right: 3px solid white; border-left: 3px solid white; }
 
-.keyboard-hint { display: flex; flex-shrink: 0; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+.keyboard-hint { display: flex; flex-shrink: 0; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 13px; }
 .keyboard-hint > span { padding: 0 3px; color: #b0b6ad; }
-kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; color: #59645d; font: 9px var(--mono); }
+kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; color: #59645d; font: 11.7px var(--mono); }
 
-footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 
 @media (max-width: 520px) {
-  .app-shell { width: min(100% - 36px, 440px); }
-  .topline { height: 68px; }
+  .app-shell { width: min(100% - 24px, 440px); }
+  .topline { height: 48px; }
   .practice { padding-top: 20px; }
   .setting-row { min-height: 59px; }
   .stepper { gap: 10px; }
   .stepper button { width: 40px; height: 40px; }
-  .setting-label { font-size: 12px; }
-  .feel-control button { padding: 0 7px; font-size: 9px; }
+  .setting-label { font-size: 15.6px; }
+  .feel-control button { padding: 0 7px; font-size: 11.7px; }
   .play-button { min-height: 70px; margin-top: 25px; }
 }
 
 @media (max-height: 600px) {
-  .topline { height: 48px; }
+  .topline { height: 44px; }
   .practice { padding: 8px 0; }
   .phase-row { margin-bottom: 12px; }
   .timeline { min-height: 64px; }
@@ -314,8 +319,8 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.2.2">v1.2.2</span>
-        <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+        <span class="app-version" aria-label="Version 1.3.0">v1.3.0</span>
+        <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
       </div>
     </header>
 
@@ -345,6 +350,13 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
         <div class="setting-row">
           <span class="setting-label">Metronome</span>
           <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Time signature</span>
+          <div class="feel-control" role="group" aria-label="Time signature">
+            <button type="button" data-meter="4" aria-pressed="true">4/4</button>
+            <button type="button" data-meter="3" aria-pressed="false">3/4</button>
+          </div>
         </div>
         <div class="setting-row">
           <span class="setting-label">Complexity</span>
@@ -398,6 +410,7 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
 <script>
 const state = {
   tempo: 100,
+  beatsPerBar: 4,
   complexity: 1,
   feel: 'straight',
   rhythmSound: 'warm-knock',
@@ -409,12 +422,12 @@ const state = {
 };
 
 const rhythmGenerator = {
-  generate(level, feel) {
-    const hits = new Array(16).fill(false);
+  generate(level, feel, beatsPerBar = state.beatsPerBar) {
+    const hits = new Array(beatsPerBar * 4).fill(false);
     const chance = (value) => Math.random() < value;
 
     if (level === 1) {
-      for (let beat = 0; beat < 4; beat += 1) hits[beat * 4] = chance(0.7);
+      for (let beat = 0; beat < beatsPerBar; beat += 1) hits[beat * 4] = chance(0.7);
       if (hits.filter(Boolean).length < 2) {
         hits[0] = true;
         hits[8] = true;
@@ -424,7 +437,7 @@ const rhythmGenerator = {
       const eighthChance = level === 2 ? 0.22 : level === 3 ? 0.38 : level === 4 ? 0.31 : 0.4;
       const sixteenthChance = level === 4 ? 0.13 : level === 5 ? 0.2 : 0;
 
-      for (let beat = 0; beat < 4; beat += 1) {
+      for (let beat = 0; beat < beatsPerBar; beat += 1) {
         const base = beat * 4;
         hits[base] = chance(downbeatChance);
         hits[base + 2] = chance(eighthChance);
@@ -447,7 +460,7 @@ const rhythmGenerator = {
       }
     }
 
-    const offbeatPositions = [2, 6, 10, 14];
+    const offbeatPositions = Array.from({ length: beatsPerBar }, (_, beat) => beat * 4 + 2);
     if (!offbeatPositions.some((position) => hits[position])) {
       if (level === 5 && hits.filter(Boolean).length >= 11) {
         const removable = hits.findIndex((hit, index) => hit && index % 4 !== 0);
@@ -465,7 +478,7 @@ const rhythmGenerator = {
       return [part === 2 && swingRatio !== null ? beat + swingRatio : subdivision / 4];
     });
     return positions.map((position, index) => {
-      const nextPosition = positions[index + 1] ?? 4;
+      const nextPosition = positions[index + 1] ?? beatsPerBar;
       return {
         position,
         duration: Math.min(1, nextPosition - position),
@@ -607,6 +620,7 @@ const scheduler = {
       cycle,
       cycleTotal,
       turnTotal,
+      beatsPerBar: state.beatsPerBar,
       startTime,
       endTime: null,
       beatTimes: [startTime],
@@ -642,7 +656,7 @@ const scheduler = {
 
     segment.beat += 1;
     this.nextBeatTime = time + beatDuration;
-    if (segment.beat === 4) this.advance(segment, this.nextBeatTime);
+    if (segment.beat === segment.beatsPerBar) this.advance(segment, this.nextBeatTime);
   },
 
   advance(segment, nextStart) {
@@ -676,11 +690,14 @@ const visualizer = {
 
   init() {
     const timeline = document.getElementById('timeline');
+    if (this.animationId !== null) window.cancelAnimationFrame(this.animationId);
+    timeline.replaceChildren();
+    timeline.style.setProperty('--beats-per-bar', state.beatsPerBar);
     this.playhead = document.createElement('span');
     this.playhead.className = 'playhead';
     this.playhead.setAttribute('aria-hidden', 'true');
     this.cells = [];
-    for (let beat = 0; beat < 4; beat += 1) {
+    for (let beat = 0; beat < state.beatsPerBar; beat += 1) {
       const group = document.createElement('div');
       group.className = 'beat-group';
       for (let part = 0; part < 4; part += 1) {
@@ -702,8 +719,8 @@ const visualizer = {
 
   renderRhythm(rhythm = state.rhythm) {
     const labels = document.getElementById('grid-labels');
-    const stepCount = state.complexity === 1 ? 4 : state.complexity <= 3 ? 8 : 16;
-    const partsPerBeat = stepCount / 4;
+    const partsPerBeat = state.complexity === 1 ? 1 : state.complexity <= 3 ? 2 : 4;
+    const stepCount = partsPerBeat * state.beatsPerBar;
     labels.replaceChildren();
     labels.style.setProperty('--step-count', stepCount);
 
@@ -750,11 +767,11 @@ const visualizer = {
       const repeatLabel = segment.cycleTotal > 1 ? `Repeat ${segment.cycle} / ${segment.cycleTotal} · ` : '';
       document.getElementById('bar-position').textContent = `${repeatLabel}Bar ${segment.bar} / ${segment.total}`;
       let beat = 0;
-      while (beat < 3 && now >= (segment.beatTimes[beat + 1] ?? Infinity)) beat += 1;
+      while (beat < segment.beatsPerBar - 1 && now >= (segment.beatTimes[beat + 1] ?? Infinity)) beat += 1;
       const beatStart = segment.beatTimes[beat] ?? segment.startTime;
       const beatEnd = segment.beatTimes[beat + 1] ?? beatStart + 60 / state.tempo;
       const fraction = Math.min(0.999, Math.max(0, (now - beatStart) / (beatEnd - beatStart)));
-      this.playhead.style.left = `${((beat + fraction) / 4) * 100}%`;
+      this.playhead.style.left = `${((beat + fraction) / segment.beatsPerBar) * 100}%`;
       this.playhead.style.opacity = '1';
     } else {
       document.getElementById('phase-name').textContent = 'LISTEN';
@@ -811,6 +828,18 @@ const controls = {
       });
     });
 
+    document.querySelectorAll('[data-meter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const beatsPerBar = Number(button.dataset.meter);
+        if (beatsPerBar === state.beatsPerBar) return;
+        if (state.playing || this.starting) this.stopPlayback('Meter changed. Tap PLAY to start.');
+        state.beatsPerBar = beatsPerBar;
+        state.rhythm = rhythmGenerator.generate(state.complexity, state.feel);
+        visualizer.init();
+        this.render();
+      });
+    });
+
     document.getElementById('rhythm-sound').addEventListener('change', (event) => {
       const sound = event.currentTarget.value;
       if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
@@ -843,6 +872,10 @@ const controls = {
   },
 
   render() {
+    document.getElementById('meter-value').textContent = `${state.beatsPerBar}/4`;
+    document.querySelectorAll('[data-meter]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));
+    });
     document.getElementById('rhythm-sound').value = state.rhythmSound;
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;

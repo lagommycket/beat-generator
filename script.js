@@ -1,5 +1,6 @@
 const state = {
   tempo: 100,
+  beatsPerBar: 4,
   complexity: 1,
   feel: 'straight',
   rhythmSound: 'warm-knock',
@@ -11,12 +12,12 @@ const state = {
 };
 
 const rhythmGenerator = {
-  generate(level, feel) {
-    const hits = new Array(16).fill(false);
+  generate(level, feel, beatsPerBar = state.beatsPerBar) {
+    const hits = new Array(beatsPerBar * 4).fill(false);
     const chance = (value) => Math.random() < value;
 
     if (level === 1) {
-      for (let beat = 0; beat < 4; beat += 1) hits[beat * 4] = chance(0.7);
+      for (let beat = 0; beat < beatsPerBar; beat += 1) hits[beat * 4] = chance(0.7);
       if (hits.filter(Boolean).length < 2) {
         hits[0] = true;
         hits[8] = true;
@@ -26,7 +27,7 @@ const rhythmGenerator = {
       const eighthChance = level === 2 ? 0.22 : level === 3 ? 0.38 : level === 4 ? 0.31 : 0.4;
       const sixteenthChance = level === 4 ? 0.13 : level === 5 ? 0.2 : 0;
 
-      for (let beat = 0; beat < 4; beat += 1) {
+      for (let beat = 0; beat < beatsPerBar; beat += 1) {
         const base = beat * 4;
         hits[base] = chance(downbeatChance);
         hits[base + 2] = chance(eighthChance);
@@ -49,7 +50,7 @@ const rhythmGenerator = {
       }
     }
 
-    const offbeatPositions = [2, 6, 10, 14];
+    const offbeatPositions = Array.from({ length: beatsPerBar }, (_, beat) => beat * 4 + 2);
     if (!offbeatPositions.some((position) => hits[position])) {
       if (level === 5 && hits.filter(Boolean).length >= 11) {
         const removable = hits.findIndex((hit, index) => hit && index % 4 !== 0);
@@ -67,7 +68,7 @@ const rhythmGenerator = {
       return [part === 2 && swingRatio !== null ? beat + swingRatio : subdivision / 4];
     });
     return positions.map((position, index) => {
-      const nextPosition = positions[index + 1] ?? 4;
+      const nextPosition = positions[index + 1] ?? beatsPerBar;
       return {
         position,
         duration: Math.min(1, nextPosition - position),
@@ -209,6 +210,7 @@ const scheduler = {
       cycle,
       cycleTotal,
       turnTotal,
+      beatsPerBar: state.beatsPerBar,
       startTime,
       endTime: null,
       beatTimes: [startTime],
@@ -244,7 +246,7 @@ const scheduler = {
 
     segment.beat += 1;
     this.nextBeatTime = time + beatDuration;
-    if (segment.beat === 4) this.advance(segment, this.nextBeatTime);
+    if (segment.beat === segment.beatsPerBar) this.advance(segment, this.nextBeatTime);
   },
 
   advance(segment, nextStart) {
@@ -278,11 +280,14 @@ const visualizer = {
 
   init() {
     const timeline = document.getElementById('timeline');
+    if (this.animationId !== null) window.cancelAnimationFrame(this.animationId);
+    timeline.replaceChildren();
+    timeline.style.setProperty('--beats-per-bar', state.beatsPerBar);
     this.playhead = document.createElement('span');
     this.playhead.className = 'playhead';
     this.playhead.setAttribute('aria-hidden', 'true');
     this.cells = [];
-    for (let beat = 0; beat < 4; beat += 1) {
+    for (let beat = 0; beat < state.beatsPerBar; beat += 1) {
       const group = document.createElement('div');
       group.className = 'beat-group';
       for (let part = 0; part < 4; part += 1) {
@@ -304,8 +309,8 @@ const visualizer = {
 
   renderRhythm(rhythm = state.rhythm) {
     const labels = document.getElementById('grid-labels');
-    const stepCount = state.complexity === 1 ? 4 : state.complexity <= 3 ? 8 : 16;
-    const partsPerBeat = stepCount / 4;
+    const partsPerBeat = state.complexity === 1 ? 1 : state.complexity <= 3 ? 2 : 4;
+    const stepCount = partsPerBeat * state.beatsPerBar;
     labels.replaceChildren();
     labels.style.setProperty('--step-count', stepCount);
 
@@ -352,11 +357,11 @@ const visualizer = {
       const repeatLabel = segment.cycleTotal > 1 ? `Repeat ${segment.cycle} / ${segment.cycleTotal} · ` : '';
       document.getElementById('bar-position').textContent = `${repeatLabel}Bar ${segment.bar} / ${segment.total}`;
       let beat = 0;
-      while (beat < 3 && now >= (segment.beatTimes[beat + 1] ?? Infinity)) beat += 1;
+      while (beat < segment.beatsPerBar - 1 && now >= (segment.beatTimes[beat + 1] ?? Infinity)) beat += 1;
       const beatStart = segment.beatTimes[beat] ?? segment.startTime;
       const beatEnd = segment.beatTimes[beat + 1] ?? beatStart + 60 / state.tempo;
       const fraction = Math.min(0.999, Math.max(0, (now - beatStart) / (beatEnd - beatStart)));
-      this.playhead.style.left = `${((beat + fraction) / 4) * 100}%`;
+      this.playhead.style.left = `${((beat + fraction) / segment.beatsPerBar) * 100}%`;
       this.playhead.style.opacity = '1';
     } else {
       document.getElementById('phase-name').textContent = 'LISTEN';
@@ -413,6 +418,18 @@ const controls = {
       });
     });
 
+    document.querySelectorAll('[data-meter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const beatsPerBar = Number(button.dataset.meter);
+        if (beatsPerBar === state.beatsPerBar) return;
+        if (state.playing || this.starting) this.stopPlayback('Meter changed. Tap PLAY to start.');
+        state.beatsPerBar = beatsPerBar;
+        state.rhythm = rhythmGenerator.generate(state.complexity, state.feel);
+        visualizer.init();
+        this.render();
+      });
+    });
+
     document.getElementById('rhythm-sound').addEventListener('change', (event) => {
       const sound = event.currentTarget.value;
       if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
@@ -445,6 +462,10 @@ const controls = {
   },
 
   render() {
+    document.getElementById('meter-value').textContent = `${state.beatsPerBar}/4`;
+    document.querySelectorAll('[data-meter]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));
+    });
     document.getElementById('rhythm-sound').value = state.rhythmSound;
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;

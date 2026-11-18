@@ -13,8 +13,8 @@
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.2.2">v1.2.2</span>
-        <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+        <span class="app-version" aria-label="Version 1.3.0">v1.3.0</span>
+        <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
       </div>
     </header>
 
@@ -44,6 +44,13 @@
         <div class="setting-row">
           <span class="setting-label">Metronome</span>
           <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Time signature</span>
+          <div class="feel-control" role="group" aria-label="Time signature">
+            <button type="button" data-meter="4" aria-pressed="true">4/4</button>
+            <button type="button" data-meter="3" aria-pressed="false">3/4</button>
+          </div>
         </div>
         <div class="setting-row">
           <span class="setting-label">Complexity</span>
