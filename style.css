@@ -171,20 +171,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .volume-control input:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
 .volume-control output { flex-shrink: 0; width: 40px; text-align: right; font: 14.3px var(--mono); }
 
-.sound-select {
-  width: 158px;
-  max-width: 55%;
-  min-height: 44px;
-  padding: 8px;
-  border: 1px solid #d5dbd2;
-  border-radius: 4px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 20.8px var(--sans);
-  touch-action: manipulation;
-}
-.sound-select:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
-
 .stepper { display: flex; flex-shrink: 0; align-items: center; gap: 13px; }
 .stepper button {
   display: grid;
@@ -229,6 +215,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   touch-action: manipulation;
 }
 .feel-control button[aria-pressed="true"] { background: white; color: var(--green); box-shadow: 0 1px 3px #1d29251a; }
+
+.sound-control { display: grid; width: 240px; max-width: 70%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sound-control button { min-width: 0; min-height: 36px; white-space: normal; }
 
 .toggle {
   display: inline-flex;

@@ -13,7 +13,7 @@
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.4.0">v1.4.0</span>
+        <span class="app-version" aria-label="Version 1.5.1">v1.5.1</span>
         <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
       </div>
     </header>
@@ -92,13 +92,20 @@
           </div>
         </div>
         <div class="setting-row">
-          <label class="setting-label" for="rhythm-sound">Rhythm sound</label>
-          <select class="sound-select" id="rhythm-sound">
-            <option value="warm-knock">Warm Knock</option>
-            <option value="low-pulse">Low Pulse</option>
-            <option value="soft-tone">Soft Tone</option>
-            <option value="original-click">Original Click</option>
-          </select>
+          <span class="setting-label">Rhythm sound</span>
+          <div class="feel-control sound-control" role="group" aria-label="Rhythm sound">
+            <button type="button" data-sound="warm-knock" aria-pressed="true">Warm Knock</button>
+            <button type="button" data-sound="low-pulse" aria-pressed="false">Low Pulse</button>
+            <button type="button" data-sound="soft-tone" aria-pressed="false">Soft Tone</button>
+            <button type="button" data-sound="original-click" aria-pressed="false">Original Click</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Note length</span>
+          <div class="feel-control" role="group" aria-label="Note length">
+            <button type="button" data-note-length="short" aria-pressed="true">Short</button>
+            <button type="button" data-note-length="sustained" aria-pressed="false">Sustained</button>
+          </div>
         </div>
       </div>
 

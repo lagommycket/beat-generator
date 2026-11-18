@@ -183,20 +183,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .volume-control input:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
 .volume-control output { flex-shrink: 0; width: 40px; text-align: right; font: 14.3px var(--mono); }
 
-.sound-select {
-  width: 158px;
-  max-width: 55%;
-  min-height: 44px;
-  padding: 8px;
-  border: 1px solid #d5dbd2;
-  border-radius: 4px;
-  background: var(--paper);
-  color: var(--ink);
-  font: 20.8px var(--sans);
-  touch-action: manipulation;
-}
-.sound-select:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
-
 .stepper { display: flex; flex-shrink: 0; align-items: center; gap: 13px; }
 .stepper button {
   display: grid;
@@ -241,6 +227,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   touch-action: manipulation;
 }
 .feel-control button[aria-pressed="true"] { background: white; color: var(--green); box-shadow: 0 1px 3px #1d29251a; }
+
+.sound-control { display: grid; width: 240px; max-width: 70%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sound-control button { min-width: 0; min-height: 36px; white-space: normal; }
 
 .toggle {
   display: inline-flex;
@@ -324,7 +313,7 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.4.0">v1.4.0</span>
+        <span class="app-version" aria-label="Version 1.5.1">v1.5.1</span>
         <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
       </div>
     </header>
@@ -403,13 +392,20 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
           </div>
         </div>
         <div class="setting-row">
-          <label class="setting-label" for="rhythm-sound">Rhythm sound</label>
-          <select class="sound-select" id="rhythm-sound">
-            <option value="warm-knock">Warm Knock</option>
-            <option value="low-pulse">Low Pulse</option>
-            <option value="soft-tone">Soft Tone</option>
-            <option value="original-click">Original Click</option>
-          </select>
+          <span class="setting-label">Rhythm sound</span>
+          <div class="feel-control sound-control" role="group" aria-label="Rhythm sound">
+            <button type="button" data-sound="warm-knock" aria-pressed="true">Warm Knock</button>
+            <button type="button" data-sound="low-pulse" aria-pressed="false">Low Pulse</button>
+            <button type="button" data-sound="soft-tone" aria-pressed="false">Soft Tone</button>
+            <button type="button" data-sound="original-click" aria-pressed="false">Original Click</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Note length</span>
+          <div class="feel-control" role="group" aria-label="Note length">
+            <button type="button" data-note-length="short" aria-pressed="true">Short</button>
+            <button type="button" data-note-length="sustained" aria-pressed="false">Sustained</button>
+          </div>
         </div>
       </div>
 
@@ -426,6 +422,7 @@ const state = {
   complexity: 1,
   feel: 'straight',
   rhythmSound: 'warm-knock',
+  noteLength: 'short',
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
@@ -562,7 +559,7 @@ const audioEngine = {
     return context;
   },
 
-  tone(time, frequency, volume, type, duration) {
+  tone(time, frequency, volume, type, duration, sustained = false) {
     const context = this.context;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -570,6 +567,7 @@ const audioEngine = {
     oscillator.frequency.setValueAtTime(frequency, time);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(volume, time + 0.004);
+    if (sustained) gain.gain.setValueAtTime(volume, time + duration - Math.min(0.04, duration * 0.2));
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
     oscillator.connect(gain);
     gain.connect(context.destination);
@@ -591,7 +589,7 @@ const audioEngine = {
 
   hit(time, duration) {
     const sound = this.rhythmSounds[state.rhythmSound] ?? this.rhythmSounds['warm-knock'];
-    this.tone(time, sound.frequency, sound.volume, sound.type, duration);
+    this.tone(time, sound.frequency, sound.volume, sound.type, duration, state.noteLength === 'sustained');
   },
 
   stopAll() {
@@ -664,7 +662,9 @@ const scheduler = {
         if (event.position < beat || event.position >= beat + 1) continue;
         const eventTime = time + (event.position - beat) * beatDuration;
         event.scheduledAudioTime = eventTime;
-        event.soundDuration = Math.min(0.12, event.duration * beatDuration * 0.8);
+        event.soundDuration = state.noteLength === 'sustained'
+          ? event.duration * beatDuration * 0.95
+          : Math.min(0.12, event.duration * beatDuration * 0.8);
         audioEngine.hit(eventTime, event.soundDuration);
       }
     }
@@ -855,9 +855,19 @@ const controls = {
       });
     });
 
-    document.getElementById('rhythm-sound').addEventListener('change', (event) => {
-      const sound = event.currentTarget.value;
-      if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+    document.querySelectorAll('[data-note-length]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.noteLength = button.dataset.noteLength;
+        this.render();
+      });
+    });
+
+    document.querySelectorAll('[data-sound]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const sound = button.dataset.sound;
+        if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+        this.render();
+      });
     });
 
     document.getElementById('metronome-volume').addEventListener('input', (event) => {
@@ -892,6 +902,9 @@ const controls = {
   },
 
   render() {
+    document.querySelectorAll('[data-note-length]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.noteLength === state.noteLength));
+    });
     document.getElementById('metronome-volume').value = state.metronomeVolume;
     document.getElementById('metronome-volume-value').textContent = `${state.metronomeVolume}%`;
     document.getElementById('metronome-volume').setAttribute('aria-valuetext', `${state.metronomeVolume}%`);
@@ -899,7 +912,9 @@ const controls = {
     document.querySelectorAll('[data-meter]').forEach((button) => {
       button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));
     });
-    document.getElementById('rhythm-sound').value = state.rhythmSound;
+    document.querySelectorAll('[data-sound]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.sound === state.rhythmSound));
+    });
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;
     document.getElementById('repeat-count-value').textContent = state.repeatCount;

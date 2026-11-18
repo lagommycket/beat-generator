@@ -4,6 +4,7 @@ const state = {
   complexity: 1,
   feel: 'straight',
   rhythmSound: 'warm-knock',
+  noteLength: 'short',
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
@@ -140,7 +141,7 @@ const audioEngine = {
     return context;
   },
 
-  tone(time, frequency, volume, type, duration) {
+  tone(time, frequency, volume, type, duration, sustained = false) {
     const context = this.context;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -148,6 +149,7 @@ const audioEngine = {
     oscillator.frequency.setValueAtTime(frequency, time);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(volume, time + 0.004);
+    if (sustained) gain.gain.setValueAtTime(volume, time + duration - Math.min(0.04, duration * 0.2));
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
     oscillator.connect(gain);
     gain.connect(context.destination);
@@ -169,7 +171,7 @@ const audioEngine = {
 
   hit(time, duration) {
     const sound = this.rhythmSounds[state.rhythmSound] ?? this.rhythmSounds['warm-knock'];
-    this.tone(time, sound.frequency, sound.volume, sound.type, duration);
+    this.tone(time, sound.frequency, sound.volume, sound.type, duration, state.noteLength === 'sustained');
   },
 
   stopAll() {
@@ -242,7 +244,9 @@ const scheduler = {
         if (event.position < beat || event.position >= beat + 1) continue;
         const eventTime = time + (event.position - beat) * beatDuration;
         event.scheduledAudioTime = eventTime;
-        event.soundDuration = Math.min(0.12, event.duration * beatDuration * 0.8);
+        event.soundDuration = state.noteLength === 'sustained'
+          ? event.duration * beatDuration * 0.95
+          : Math.min(0.12, event.duration * beatDuration * 0.8);
         audioEngine.hit(eventTime, event.soundDuration);
       }
     }
@@ -433,9 +437,19 @@ const controls = {
       });
     });
 
-    document.getElementById('rhythm-sound').addEventListener('change', (event) => {
-      const sound = event.currentTarget.value;
-      if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+    document.querySelectorAll('[data-note-length]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.noteLength = button.dataset.noteLength;
+        this.render();
+      });
+    });
+
+    document.querySelectorAll('[data-sound]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const sound = button.dataset.sound;
+        if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+        this.render();
+      });
     });
 
     document.getElementById('metronome-volume').addEventListener('input', (event) => {
@@ -470,6 +484,9 @@ const controls = {
   },
 
   render() {
+    document.querySelectorAll('[data-note-length]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.noteLength === state.noteLength));
+    });
     document.getElementById('metronome-volume').value = state.metronomeVolume;
     document.getElementById('metronome-volume-value').textContent = `${state.metronomeVolume}%`;
     document.getElementById('metronome-volume').setAttribute('aria-valuetext', `${state.metronomeVolume}%`);
@@ -477,7 +494,9 @@ const controls = {
     document.querySelectorAll('[data-meter]').forEach((button) => {
       button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));
     });
-    document.getElementById('rhythm-sound').value = state.rhythmSound;
+    document.querySelectorAll('[data-sound]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.sound === state.rhythmSound));
+    });
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;
     document.getElementById('repeat-count-value').textContent = state.repeatCount;
