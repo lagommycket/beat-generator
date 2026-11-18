@@ -82,7 +82,23 @@ const audioEngine = {
   unlocked: false,
   activeSources: new Set(),
 
+  diagnose(action, error) {
+    console.info('[Pulse audio]', {
+      action,
+      browser: navigator.userAgent,
+      contextState: this.context?.state ?? 'not-created',
+      sessionType: navigator.audioSession?.type ?? 'unsupported',
+      unlocked: this.unlocked,
+      schedulerActive: scheduler.intervalId !== null,
+      playing: state.playing,
+      error,
+    });
+  },
+
   async resume() {
+    if (navigator.audioSession) {
+      try { navigator.audioSession.type = 'playback'; } catch (error) { this.diagnose('audio-session-unavailable', error); }
+    }
     if (this.context?.state === 'closed') {
       this.context = null;
       this.unlocked = false;
@@ -91,17 +107,27 @@ const audioEngine = {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
       this.context = new AudioContextClass();
+      this.context.addEventListener('statechange', () => {
+        this.diagnose('context-statechange');
+        if (this.context.state !== 'running' && state.playing) {
+          controls.stopPlayback('Audio paused. Tap PLAY to continue.');
+        }
+      });
     }
     const context = this.context;
+    this.diagnose('resume-requested');
+    const resumeResult = context.resume();
     if (!this.unlocked || context.state !== 'running') {
       const source = context.createBufferSource();
       source.buffer = context.createBuffer(1, 1, context.sampleRate);
       source.connect(context.destination);
+      source.addEventListener('ended', () => source.disconnect(), { once: true });
       source.start(0);
-      this.unlocked = true;
     }
-    if (context.state !== 'running') await context.resume();
+    await resumeResult;
     if (context.state !== 'running') throw new Error('AudioContext could not be resumed.');
+    this.unlocked = true;
+    this.diagnose('resume-succeeded');
     return context;
   },
 
@@ -116,7 +142,11 @@ const audioEngine = {
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
     oscillator.connect(gain);
     gain.connect(context.destination);
-    oscillator.addEventListener('ended', () => this.activeSources.delete(oscillator), { once: true });
+    oscillator.addEventListener('ended', () => {
+      this.activeSources.delete(oscillator);
+      oscillator.disconnect();
+      gain.disconnect();
+    }, { once: true });
     this.activeSources.add(oscillator);
     oscillator.start(time);
     oscillator.stop(time + duration + 0.01);
@@ -146,6 +176,7 @@ const scheduler = {
   lookahead: 0.12,
 
   start(startTime) {
+    this.stop();
     this.segments = [];
     this.segment = null;
     this.nextBeatTime = startTime;
@@ -330,7 +361,25 @@ const visualizer = {
 };
 
 const controls = {
+  starting: false,
+  startAttempt: 0,
+
   init() {
+    const audioStatus = document.createElement('p');
+    audioStatus.id = 'audio-status';
+    audioStatus.className = 'keyboard-hint';
+    audioStatus.setAttribute('role', 'status');
+    audioStatus.hidden = true;
+    audioStatus.style.display = 'none';
+    document.getElementById('play-button').after(audioStatus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && (state.playing || this.starting)) {
+        this.stopPlayback('Audio paused. Tap PLAY to continue.');
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      if (state.playing || this.starting) this.stopPlayback('Audio paused. Tap PLAY to continue.');
+    });
     document.querySelectorAll('[data-control]').forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.dataset.control;
@@ -398,28 +447,55 @@ const controls = {
     });
   },
 
+  stopPlayback(message = '') {
+    this.startAttempt += 1;
+    this.starting = false;
+    state.playing = false;
+    scheduler.stop();
+    audioEngine.stopAll();
+    this.showPlaybackState(false);
+    document.getElementById('play-button').disabled = false;
+    const status = document.getElementById('audio-status');
+    status.textContent = message;
+    status.hidden = !message;
+    status.style.display = message ? '' : 'none';
+    audioEngine.diagnose('playback-stopped');
+  },
+
   async togglePlayback() {
+    if (this.starting) return;
     if (state.playing) {
-      state.playing = false;
-      scheduler.stop();
-      audioEngine.stopAll();
-      this.showPlaybackState(false);
+      this.stopPlayback();
       return;
     }
 
     const button = document.getElementById('play-button');
+    const attempt = ++this.startAttempt;
+    this.starting = true;
     button.disabled = true;
+    document.getElementById('audio-status').hidden = true;
+    document.getElementById('audio-status').style.display = 'none';
     try {
       const context = await audioEngine.resume();
+      if (attempt !== this.startAttempt) return;
+      if (document.hidden) {
+        this.stopPlayback('Audio paused. Tap PLAY to continue.');
+        return;
+      }
       state.playing = true;
       scheduler.start(context.currentTime + 0.12);
       visualizer.renderRhythm();
       this.showPlaybackState(true);
+      audioEngine.diagnose('playback-started');
     } catch (error) {
-      document.getElementById('phase-name').textContent = 'AUDIO UNAVAILABLE';
-      console.error(error);
+      if (attempt !== this.startAttempt) return;
+      audioEngine.diagnose('playback-failed', error);
+      this.stopPlayback('Sound could not start. Tap PLAY to try again. Check Silent Mode and volume.');
     } finally {
-      button.disabled = false;
+      if (attempt === this.startAttempt) {
+        this.starting = false;
+        button.disabled = false;
+      }
     }
   },
 
