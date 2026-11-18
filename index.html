@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ef">
   <title>Pulse | Rhythm Trainer</title>
   <link rel="stylesheet" href="style.css">
@@ -13,7 +13,7 @@
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.0.0">v1.0.0</span>
+        <span class="app-version" aria-label="Version 1.2.2">v1.2.2</span>
         <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
       </div>
     </header>
@@ -33,6 +33,18 @@
       </div>
 
       <div class="settings" aria-label="Practice settings">
+        <div class="setting-row tempo-row">
+          <span class="setting-label">Tempo</span>
+          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
+            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
+            <output id="tempo-value">100 <small>BPM</small></output>
+            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Metronome</span>
+          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
         <div class="setting-row">
           <span class="setting-label">Complexity</span>
           <div class="stepper" role="group" aria-label="Complexity">
@@ -66,16 +78,13 @@
           </div>
         </div>
         <div class="setting-row">
-          <span class="setting-label">Metronome</span>
-          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
-        </div>
-        <div class="setting-row tempo-row">
-          <span class="setting-label">Tempo</span>
-          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
-            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
-            <output id="tempo-value">100 <small>BPM</small></output>
-            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
-          </div>
+          <label class="setting-label" for="rhythm-sound">Rhythm sound</label>
+          <select class="sound-select" id="rhythm-sound">
+            <option value="warm-knock">Warm Knock</option>
+            <option value="low-pulse">Low Pulse</option>
+            <option value="soft-tone">Soft Tone</option>
+            <option value="original-click">Original Click</option>
+          </select>
         </div>
       </div>
 
@@ -83,9 +92,7 @@
         <span class="play-icon" aria-hidden="true"></span>
         <span id="play-label">PLAY</span>
       </button>
-      <p class="keyboard-hint"><kbd>Space</kbd> play / pause <span>·</span> <kbd>↑</kbd><kbd>↓</kbd> tempo</p>
     </section>
-    <footer><span>Listen close. Find the pulse.</span><span class="footer-mark">P—01</span></footer>
   </main>
 </body>
 </html>

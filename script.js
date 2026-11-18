@@ -2,6 +2,7 @@ const state = {
   tempo: 100,
   complexity: 1,
   feel: 'straight',
+  rhythmSound: 'warm-knock',
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
@@ -81,6 +82,12 @@ const audioEngine = {
   context: null,
   unlocked: false,
   activeSources: new Set(),
+  rhythmSounds: {
+    'warm-knock': { frequency: 220, volume: 0.18, type: 'triangle' },
+    'low-pulse': { frequency: 110, volume: 0.22, type: 'sine' },
+    'soft-tone': { frequency: 330, volume: 0.16, type: 'sine' },
+    'original-click': { frequency: 620, volume: 0.13, type: 'triangle' },
+  },
 
   diagnose(action, error) {
     console.info('[Pulse audio]', {
@@ -157,7 +164,8 @@ const audioEngine = {
   },
 
   hit(time, duration) {
-    this.tone(time, 620, 0.13, 'triangle', duration);
+    const sound = this.rhythmSounds[state.rhythmSound] ?? this.rhythmSounds['warm-knock'];
+    this.tone(time, sound.frequency, sound.volume, sound.type, duration);
   },
 
   stopAll() {
@@ -371,7 +379,7 @@ const controls = {
     audioStatus.setAttribute('role', 'status');
     audioStatus.hidden = true;
     audioStatus.style.display = 'none';
-    document.getElementById('play-button').after(audioStatus);
+    document.getElementById('play-button').before(audioStatus);
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && (state.playing || this.starting)) {
         this.stopPlayback('Audio paused. Tap PLAY to continue.');
@@ -405,6 +413,11 @@ const controls = {
       });
     });
 
+    document.getElementById('rhythm-sound').addEventListener('change', (event) => {
+      const sound = event.currentTarget.value;
+      if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+    });
+
     document.getElementById('metronome-toggle').addEventListener('click', (event) => {
       state.metronome = !state.metronome;
       event.currentTarget.setAttribute('aria-pressed', String(state.metronome));
@@ -432,6 +445,7 @@ const controls = {
   },
 
   render() {
+    document.getElementById('rhythm-sound').value = state.rhythmSound;
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;
     document.getElementById('repeat-count-value').textContent = state.repeatCount;

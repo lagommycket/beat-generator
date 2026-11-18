@@ -1,4 +1,4 @@
-const CACHE_NAME = "pulse-shell-v1.0.0";
+const CACHE_NAME = "pulse-shell-v1.2.2";
 const APP_SHELL = ["./htmlSite.html", "./manifest.webmanifest", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {

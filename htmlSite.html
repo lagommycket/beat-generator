@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f6ef">
   <title>Pulse | Rhythm Trainer</title>
   <link rel="manifest" href="./manifest.webmanifest">
@@ -29,7 +29,9 @@
 html { min-width: 320px; background: var(--paper); }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   margin: 0;
   color: var(--ink);
   font-family: var(--sans);
@@ -48,7 +50,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   display: flex;
   flex-direction: column;
   width: min(100% - 48px, 600px);
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   margin: 0 auto;
 }
 
@@ -58,7 +63,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   justify-content: space-between;
 }
 
-.topline { height: 82px; border-bottom: 1px solid var(--line); }
+.topline { flex-shrink: 0; height: 82px; border-bottom: 1px solid var(--line); }
 
 .wordmark {
   display: inline-flex;
@@ -90,9 +95,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .meter-label span { padding: 0 4px; color: var(--coral); }
 
-.practice { flex: 1; padding: 50px 0 34px; }
+.practice { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 24px 0 20px; }
 
-.phase-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 21px; }
+.phase-row { display: flex; flex-shrink: 0; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 21px; }
 
 .phase-indicator { display: inline-flex; gap: 9px; align-items: center; color: var(--green); }
 .phase-indicator.your-turn { color: var(--coral); }
@@ -102,6 +107,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .timeline-wrap {
   position: relative;
+  flex-shrink: 0;
   padding-top: 27px;
   padding-bottom: 22px;
   border-top: 1px solid var(--line);
@@ -158,7 +164,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 }
 .your-turn-mode .playhead { background: var(--coral); }
 
-.settings { padding-top: 22px; }
+.settings { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 12px 4px 0; margin: 0 -4px; }
 .setting-row {
   display: flex;
   min-height: 61px;
@@ -167,6 +173,20 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   border-bottom: 1px solid var(--line);
 }
 .setting-label { color: #45514a; font-size: 13px; font-weight: 600; }
+
+.sound-select {
+  width: 158px;
+  max-width: 55%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #d5dbd2;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px var(--sans);
+  touch-action: manipulation;
+}
+.sound-select:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
 
 .stepper { display: flex; align-items: center; gap: 13px; }
 .stepper button {
@@ -233,6 +253,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .play-button {
   display: flex;
+  flex-shrink: 0;
   width: 100%;
   min-height: 66px;
   gap: 13px;
@@ -256,16 +277,16 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .play-button.is-playing { background: #263b32; }
 .play-button.is-playing .play-icon { width: 10px; height: 14px; border: 0; border-right: 3px solid white; border-left: 3px solid white; }
 
-.keyboard-hint { display: flex; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+.keyboard-hint { display: flex; flex-shrink: 0; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
 .keyboard-hint > span { padding: 0 3px; color: #b0b6ad; }
 kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; color: #59645d; font: 9px var(--mono); }
 
-footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
 
 @media (max-width: 520px) {
   .app-shell { width: min(100% - 36px, 440px); }
   .topline { height: 68px; }
-  .practice { padding-top: 35px; }
+  .practice { padding-top: 20px; }
   .setting-row { min-height: 59px; }
   .stepper { gap: 10px; }
   .stepper button { width: 40px; height: 40px; }
@@ -274,17 +295,26 @@ footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted
   .play-button { min-height: 70px; margin-top: 25px; }
 }
 
+@media (max-height: 600px) {
+  .topline { height: 48px; }
+  .practice { padding: 8px 0; }
+  .phase-row { margin-bottom: 12px; }
+  .timeline { min-height: 64px; }
+  .timeline-wrap { padding-bottom: 12px; }
+  .play-button { min-height: 52px; margin-top: 12px; }
+  .practice > .keyboard-hint:not(#audio-status), footer { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
-}
-  </style>
+}  </style>
 </head>
 <body>
   <main class="app-shell">
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.0.0">v1.0.0</span>
+        <span class="app-version" aria-label="Version 1.2.2">v1.2.2</span>
         <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
       </div>
     </header>
@@ -304,6 +334,18 @@ footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted
       </div>
 
       <div class="settings" aria-label="Practice settings">
+        <div class="setting-row tempo-row">
+          <span class="setting-label">Tempo</span>
+          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
+            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
+            <output id="tempo-value">100 <small>BPM</small></output>
+            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Metronome</span>
+          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
         <div class="setting-row">
           <span class="setting-label">Complexity</span>
           <div class="stepper" role="group" aria-label="Complexity">
@@ -337,16 +379,13 @@ footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted
           </div>
         </div>
         <div class="setting-row">
-          <span class="setting-label">Metronome</span>
-          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
-        </div>
-        <div class="setting-row tempo-row">
-          <span class="setting-label">Tempo</span>
-          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
-            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
-            <output id="tempo-value">100 <small>BPM</small></output>
-            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
-          </div>
+          <label class="setting-label" for="rhythm-sound">Rhythm sound</label>
+          <select class="sound-select" id="rhythm-sound">
+            <option value="warm-knock">Warm Knock</option>
+            <option value="low-pulse">Low Pulse</option>
+            <option value="soft-tone">Soft Tone</option>
+            <option value="original-click">Original Click</option>
+          </select>
         </div>
       </div>
 
@@ -354,15 +393,14 @@ footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted
         <span class="play-icon" aria-hidden="true"></span>
         <span id="play-label">PLAY</span>
       </button>
-      <p class="keyboard-hint"><kbd>Space</kbd> play / pause <span>·</span> <kbd>↑</kbd><kbd>↓</kbd> tempo</p>
     </section>
-    <footer><span>Listen close. Find the pulse.</span><span class="footer-mark">P—01</span></footer>
   </main>
 <script>
 const state = {
   tempo: 100,
   complexity: 1,
   feel: 'straight',
+  rhythmSound: 'warm-knock',
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
@@ -442,6 +480,12 @@ const audioEngine = {
   context: null,
   unlocked: false,
   activeSources: new Set(),
+  rhythmSounds: {
+    'warm-knock': { frequency: 220, volume: 0.18, type: 'triangle' },
+    'low-pulse': { frequency: 110, volume: 0.22, type: 'sine' },
+    'soft-tone': { frequency: 330, volume: 0.16, type: 'sine' },
+    'original-click': { frequency: 620, volume: 0.13, type: 'triangle' },
+  },
 
   diagnose(action, error) {
     console.info('[Pulse audio]', {
@@ -518,7 +562,8 @@ const audioEngine = {
   },
 
   hit(time, duration) {
-    this.tone(time, 620, 0.13, 'triangle', duration);
+    const sound = this.rhythmSounds[state.rhythmSound] ?? this.rhythmSounds['warm-knock'];
+    this.tone(time, sound.frequency, sound.volume, sound.type, duration);
   },
 
   stopAll() {
@@ -732,7 +777,7 @@ const controls = {
     audioStatus.setAttribute('role', 'status');
     audioStatus.hidden = true;
     audioStatus.style.display = 'none';
-    document.getElementById('play-button').after(audioStatus);
+    document.getElementById('play-button').before(audioStatus);
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && (state.playing || this.starting)) {
         this.stopPlayback('Audio paused. Tap PLAY to continue.');
@@ -766,6 +811,11 @@ const controls = {
       });
     });
 
+    document.getElementById('rhythm-sound').addEventListener('change', (event) => {
+      const sound = event.currentTarget.value;
+      if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
+    });
+
     document.getElementById('metronome-toggle').addEventListener('click', (event) => {
       state.metronome = !state.metronome;
       event.currentTarget.setAttribute('aria-pressed', String(state.metronome));
@@ -793,6 +843,7 @@ const controls = {
   },
 
   render() {
+    document.getElementById('rhythm-sound').value = state.rhythmSound;
     document.getElementById('complexity-value').textContent = state.complexity;
     document.getElementById('pause-bars-value').textContent = state.pauseBars;
     document.getElementById('repeat-count-value').textContent = state.repeatCount;

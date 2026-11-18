@@ -17,7 +17,9 @@
 html { min-width: 320px; background: var(--paper); }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   margin: 0;
   color: var(--ink);
   font-family: var(--sans);
@@ -36,7 +38,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   display: flex;
   flex-direction: column;
   width: min(100% - 48px, 600px);
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   margin: 0 auto;
 }
 
@@ -46,7 +51,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   justify-content: space-between;
 }
 
-.topline { height: 82px; border-bottom: 1px solid var(--line); }
+.topline { flex-shrink: 0; height: 82px; border-bottom: 1px solid var(--line); }
 
 .wordmark {
   display: inline-flex;
@@ -78,9 +83,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .meter-label span { padding: 0 4px; color: var(--coral); }
 
-.practice { flex: 1; padding: 50px 0 34px; }
+.practice { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 24px 0 20px; }
 
-.phase-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 21px; }
+.phase-row { display: flex; flex-shrink: 0; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 21px; }
 
 .phase-indicator { display: inline-flex; gap: 9px; align-items: center; color: var(--green); }
 .phase-indicator.your-turn { color: var(--coral); }
@@ -90,6 +95,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .timeline-wrap {
   position: relative;
+  flex-shrink: 0;
   padding-top: 27px;
   padding-bottom: 22px;
   border-top: 1px solid var(--line);
@@ -146,7 +152,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 }
 .your-turn-mode .playhead { background: var(--coral); }
 
-.settings { padding-top: 22px; }
+.settings { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 12px 4px 0; margin: 0 -4px; }
 .setting-row {
   display: flex;
   min-height: 61px;
@@ -155,6 +161,20 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   border-bottom: 1px solid var(--line);
 }
 .setting-label { color: #45514a; font-size: 13px; font-weight: 600; }
+
+.sound-select {
+  width: 158px;
+  max-width: 55%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #d5dbd2;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px var(--sans);
+  touch-action: manipulation;
+}
+.sound-select:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
 
 .stepper { display: flex; align-items: center; gap: 13px; }
 .stepper button {
@@ -221,6 +241,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 
 .play-button {
   display: flex;
+  flex-shrink: 0;
   width: 100%;
   min-height: 66px;
   gap: 13px;
@@ -244,22 +265,32 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 .play-button.is-playing { background: #263b32; }
 .play-button.is-playing .play-icon { width: 10px; height: 14px; border: 0; border-right: 3px solid white; border-left: 3px solid white; }
 
-.keyboard-hint { display: flex; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+.keyboard-hint { display: flex; flex-shrink: 0; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 13px 0 0; color: var(--muted); font-size: 10px; }
 .keyboard-hint > span { padding: 0 3px; color: #b0b6ad; }
 kbd { padding: 1px 4px; border: 1px solid var(--line); border-radius: 3px; color: #59645d; font: 9px var(--mono); }
 
-footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
 
 @media (max-width: 520px) {
   .app-shell { width: min(100% - 36px, 440px); }
   .topline { height: 68px; }
-  .practice { padding-top: 35px; }
+  .practice { padding-top: 20px; }
   .setting-row { min-height: 59px; }
   .stepper { gap: 10px; }
   .stepper button { width: 40px; height: 40px; }
   .setting-label { font-size: 12px; }
   .feel-control button { padding: 0 7px; font-size: 9px; }
   .play-button { min-height: 70px; margin-top: 25px; }
+}
+
+@media (max-height: 600px) {
+  .topline { height: 48px; }
+  .practice { padding: 8px 0; }
+  .phase-row { margin-bottom: 12px; }
+  .timeline { min-height: 64px; }
+  .timeline-wrap { padding-bottom: 12px; }
+  .play-button { min-height: 52px; margin-top: 12px; }
+  .practice > .keyboard-hint:not(#audio-status), footer { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
