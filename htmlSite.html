@@ -79,6 +79,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   box-shadow: 7px 0 0 -2px var(--coral);
 }
 
+.header-details { display: grid; gap: 6px; justify-items: end; }
+.app-version { color: var(--muted); font: 10px var(--mono); }
+
 .meter-label, .footer-mark {
   color: var(--muted);
   font: 10px var(--mono);
@@ -280,7 +283,10 @@ footer { min-height: 55px; border-top: 1px solid var(--line); color: var(--muted
   <main class="app-shell">
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
-      <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+      <div class="header-details">
+        <span class="app-version" aria-label="Version 1.0.0">v1.0.0</span>
+        <span class="meter-label">RHYTHM TRAINER <span>·</span> 4/4</span>
+      </div>
     </header>
 
     <section class="practice" aria-label="Rhythm practice">

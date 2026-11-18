@@ -67,6 +67,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
   box-shadow: 7px 0 0 -2px var(--coral);
 }
 
+.header-details { display: grid; gap: 6px; justify-items: end; }
+.app-version { color: var(--muted); font: 10px var(--mono); }
+
 .meter-label, .footer-mark {
   color: var(--muted);
   font: 10px var(--mono);
