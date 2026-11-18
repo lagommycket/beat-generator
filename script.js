@@ -7,6 +7,7 @@ const state = {
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
+  metronomeVolume: 50,
   playing: false,
   rhythm: [],
 };
@@ -161,7 +162,9 @@ const audioEngine = {
   },
 
   click(time, accented) {
-    this.tone(time, accented ? 1250 : 930, accented ? 0.035 : 0.021, 'sine', 0.045);
+    if (state.metronomeVolume === 0) return;
+    const volume = (accented ? 0.035 : 0.021) * state.metronomeVolume / 50;
+    this.tone(time, accented ? 1250 : 930, volume, 'sine', 0.045);
   },
 
   hit(time, duration) {
@@ -435,6 +438,11 @@ const controls = {
       if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
     });
 
+    document.getElementById('metronome-volume').addEventListener('input', (event) => {
+      state.metronomeVolume = Math.min(100, Math.max(0, Number(event.currentTarget.value)));
+      this.render();
+    });
+
     document.getElementById('metronome-toggle').addEventListener('click', (event) => {
       state.metronome = !state.metronome;
       event.currentTarget.setAttribute('aria-pressed', String(state.metronome));
@@ -462,6 +470,9 @@ const controls = {
   },
 
   render() {
+    document.getElementById('metronome-volume').value = state.metronomeVolume;
+    document.getElementById('metronome-volume-value').textContent = `${state.metronomeVolume}%`;
+    document.getElementById('metronome-volume').setAttribute('aria-valuetext', `${state.metronomeVolume}%`);
     document.getElementById('meter-value').textContent = `${state.beatsPerBar}/4`;
     document.querySelectorAll('[data-meter]').forEach((button) => {
       button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));

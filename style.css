@@ -166,6 +166,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 }
 .setting-label { min-width: 0; color: #45514a; font-size: 16.9px; font-weight: 600; }
 
+.volume-control { display: flex; flex-shrink: 0; gap: 8px; width: 158px; align-items: center; }
+.volume-control input { width: 100%; min-width: 0; height: 44px; margin: 0; accent-color: var(--green); cursor: pointer; }
+.volume-control input:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
+.volume-control output { flex-shrink: 0; width: 40px; text-align: right; font: 14.3px var(--mono); }
+
 .sound-select {
   width: 158px;
   max-width: 55%;

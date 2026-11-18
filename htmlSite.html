@@ -178,6 +178,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #438e6e; outline-offs
 }
 .setting-label { min-width: 0; color: #45514a; font-size: 16.9px; font-weight: 600; }
 
+.volume-control { display: flex; flex-shrink: 0; gap: 8px; width: 158px; align-items: center; }
+.volume-control input { width: 100%; min-width: 0; height: 44px; margin: 0; accent-color: var(--green); cursor: pointer; }
+.volume-control input:focus-visible { outline: 3px solid #438e6e; outline-offset: 3px; }
+.volume-control output { flex-shrink: 0; width: 40px; text-align: right; font: 14.3px var(--mono); }
+
 .sound-select {
   width: 158px;
   max-width: 55%;
@@ -319,7 +324,7 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
     <header class="topline">
       <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
       <div class="header-details">
-        <span class="app-version" aria-label="Version 1.3.0">v1.3.0</span>
+        <span class="app-version" aria-label="Version 1.4.0">v1.4.0</span>
         <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
       </div>
     </header>
@@ -350,6 +355,13 @@ footer { flex-shrink: 0; min-height: 40px; border-top: 1px solid var(--line); co
         <div class="setting-row">
           <span class="setting-label">Metronome</span>
           <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="metronome-volume">Metronome volume</label>
+          <div class="volume-control">
+            <input id="metronome-volume" type="range" min="0" max="100" step="1" value="50" aria-valuetext="50%">
+            <output id="metronome-volume-value" for="metronome-volume">50%</output>
+          </div>
         </div>
         <div class="setting-row">
           <span class="setting-label">Time signature</span>
@@ -417,6 +429,7 @@ const state = {
   pauseBars: 1,
   repeatCount: 1,
   metronome: true,
+  metronomeVolume: 50,
   playing: false,
   rhythm: [],
 };
@@ -571,7 +584,9 @@ const audioEngine = {
   },
 
   click(time, accented) {
-    this.tone(time, accented ? 1250 : 930, accented ? 0.035 : 0.021, 'sine', 0.045);
+    if (state.metronomeVolume === 0) return;
+    const volume = (accented ? 0.035 : 0.021) * state.metronomeVolume / 50;
+    this.tone(time, accented ? 1250 : 930, volume, 'sine', 0.045);
   },
 
   hit(time, duration) {
@@ -845,6 +860,11 @@ const controls = {
       if (Object.hasOwn(audioEngine.rhythmSounds, sound)) state.rhythmSound = sound;
     });
 
+    document.getElementById('metronome-volume').addEventListener('input', (event) => {
+      state.metronomeVolume = Math.min(100, Math.max(0, Number(event.currentTarget.value)));
+      this.render();
+    });
+
     document.getElementById('metronome-toggle').addEventListener('click', (event) => {
       state.metronome = !state.metronome;
       event.currentTarget.setAttribute('aria-pressed', String(state.metronome));
@@ -872,6 +892,9 @@ const controls = {
   },
 
   render() {
+    document.getElementById('metronome-volume').value = state.metronomeVolume;
+    document.getElementById('metronome-volume-value').textContent = `${state.metronomeVolume}%`;
+    document.getElementById('metronome-volume').setAttribute('aria-valuetext', `${state.metronomeVolume}%`);
     document.getElementById('meter-value').textContent = `${state.beatsPerBar}/4`;
     document.querySelectorAll('[data-meter]').forEach((button) => {
       button.setAttribute('aria-pressed', String(Number(button.dataset.meter) === state.beatsPerBar));
