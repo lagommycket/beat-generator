@@ -2,147 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101513">
-  <meta name="description" content="Musical ear training with local piano and trumpet samples.">
-  <title>Ear Training</title>
-  <link rel="stylesheet" href="./css/styles.css?v=1.0.4">
-  <script type="module" src="./js/app.js?v=1.0.4"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6ef">
+  <title>Pulse | Rhythm Trainer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#home" aria-label="Ear Training home"><span class="brand-mark" aria-hidden="true">♪</span> Ear Training</a>
-    <nav aria-label="Main navigation">
-      <button class="text-button" id="nav-stats" type="button">Statistics</button>
-      <button class="icon-button" id="nav-settings" type="button" aria-label="Open settings" title="Settings">⚙</button>
-      <span class="version-label" id="app-version" aria-label="Version 1.0.4">v1.0.4</span>
-    </nav>
-  </header>
+  <main class="app-shell">
+    <header class="topline">
+      <a class="wordmark" href="#" aria-label="Pulse Rhythm Trainer home"><span class="brand-mark" aria-hidden="true"></span>pulse</a>
+      <div class="header-details">
+        <span class="app-version" aria-label="Version 1.8.3">v1.8.3</span>
+        <span class="meter-label">RHYTHM TRAINER <span>·</span> <output id="meter-value">4/4</output></span>
+      </div>
+    </header>
 
-  <main class="shell">
-    <section class="view active" id="home-view" aria-labelledby="home-title">
-      <div class="intro">
-        <p class="eyebrow">LISTEN · IDENTIFY · GROW</p>
-        <h1 id="home-title" tabindex="-1">Ear Training</h1>
-        <p class="lede">Train your musical ear with real instrument samples. Listen closely and choose the matching answer.</p>
-      </div>
-      <div class="setup-grid">
-        <fieldset class="choice-group">
-          <legend>Exercise mode</legend>
-          <div class="segmented" id="home-mode">
-            <label><input type="radio" name="home-mode" value="note" checked><span>Single note</span></label>
-            <label><input type="radio" name="home-mode" value="scale"><span>Scale</span></label>
-            <label><input type="radio" name="home-mode" value="chord"><span>Chord</span></label>
-          </div>
-        </fieldset>
-        <fieldset class="choice-group">
-          <legend>Instrument</legend>
-          <div class="segmented two" id="home-instrument">
-            <label><input type="radio" name="home-instrument" value="piano" checked><span>Piano</span></label>
-            <label><input type="radio" name="home-instrument" value="trumpet"><span>Trumpet</span></label>
-          </div>
-        </fieldset>
-        <fieldset class="choice-group">
-          <legend>Difficulty</legend>
-          <div class="segmented three" id="home-difficulty">
-            <label><input type="radio" name="home-difficulty" value="easy" checked><span>Easy</span></label>
-            <label><input type="radio" name="home-difficulty" value="medium"><span>Medium</span></label>
-            <label><input type="radio" name="home-difficulty" value="hard"><span>Hard</span></label>
-          </div>
-        </fieldset>
-      </div>
-      <div class="home-actions">
-        <button class="primary-button" id="start-training" type="button"><span aria-hidden="true">▶</span> Start training</button>
-        <button class="secondary-button" id="open-samples" type="button">Test samples</button>
-      </div>
-      <p class="note-line">Real piano and trumpet samples are stored locally. No audio is fetched from external services.</p>
-    </section>
-
-    <section class="view" id="game-view" aria-labelledby="game-title" hidden>
-      <div class="game-heading">
-        <div><p class="eyebrow" id="game-context">SINGLE NOTE · PIANO · EASY</p><h1 id="game-title" tabindex="-1">What did you hear?</h1></div>
-        <button class="secondary-button compact" id="exit-game" type="button">End training</button>
-      </div>
-      <div class="progress-row"><span id="question-progress">Question 1</span><div class="progress-track" role="progressbar" aria-label="Training progress"><span id="progress-fill"></span></div><span id="round-score">0 correct</span></div>
-      <div class="exercise-panel">
-        <div class="play-area">
-          <div class="play-actions">
-            <button class="play-button" id="play-question" type="button" aria-label="Play question"><span aria-hidden="true">▶</span></button>
-            <button class="primary-button compact next-button" id="next-question" type="button" aria-label="Next question" disabled>Next <span aria-hidden="true">→</span></button>
-          </div>
-          <p class="load-status" id="audio-status" role="status" aria-live="polite"></p>
+    <section class="practice" aria-label="Rhythm practice">
+      <div class="phase-row">
+        <div class="phase-indicator listen-phase" id="phase-indicator" aria-live="polite">
+          <span class="phase-dot" aria-hidden="true"></span>
+          <span class="phase-name" id="phase-name">LISTEN</span>
         </div>
-        <fieldset class="answer-group" id="answer-group">
-          <legend>Choose the matching answer</legend>
-          <div class="answer-grid" id="answer-options"></div>
-        </fieldset>
-        <div class="feedback-slot"><div class="feedback" id="feedback" role="status" aria-live="assertive" tabindex="-1" hidden></div></div>
-        <div class="audio-alert" id="audio-alert" role="status" aria-live="assertive" hidden><p id="audio-alert-message"></p><button class="secondary-button compact" id="retry-audio" type="button">Retry</button><button class="text-button" id="go-samples-from-error" type="button">Test samples</button></div>
+        <span class="bar-position" id="bar-position">Bar 1 / 1</span>
       </div>
-      <div class="stat-strip" aria-label="Current statistics">
-        <div><span class="stat-value" id="score-value">0</span><span class="stat-label">Score</span></div>
-        <div><span class="stat-value" id="rate-value">0%</span><span class="stat-label">Accuracy</span></div>
-        <div><span class="stat-value" id="streak-value">0</span><span class="stat-label">Streak</span></div>
-        <div><span class="stat-value" id="best-streak-value">0</span><span class="stat-label">Best streak</span></div>
+
+      <div class="timeline-wrap" id="timeline-wrap" aria-label="Rhythm timeline">
+        <div class="grid-labels" id="grid-labels" aria-hidden="true"></div>
+        <div class="timeline" id="timeline" role="img" aria-label="Generated rhythm"></div>
       </div>
-    </section>
 
-    <section class="view" id="samples-view" aria-labelledby="samples-title" hidden>
-      <div class="game-heading"><div><p class="eyebrow">LOCAL AUDIO FILES</p><h1 id="samples-title" tabindex="-1">Test samples</h1></div><button class="secondary-button compact" id="samples-back" type="button">Back</button></div>
-      <p class="lede small">Check which pitches are available for the selected instrument. No files are downloaded automatically.</p>
-      <div class="sample-toolbar"><label>Instrument<select id="sample-instrument"><option value="piano">Piano</option><option value="trumpet">Trumpet</option></select></label><label>Difficulty<select id="sample-difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label><button class="primary-button compact" id="check-all-samples" type="button">Check all</button></div>
-      <div class="sample-summary" id="sample-summary" role="status" aria-live="polite">Not checked yet</div>
-      <div class="audio-test-controls"><button class="secondary-button compact" id="test-audio-system" type="button">Test audio system</button><p id="audio-system-status" role="status" aria-live="polite"></p></div>
-      <label class="filter-label">Filter by status<select id="sample-filter"><option value="all">All pitches</option><option value="unchecked">Not checked</option><option value="available">Available</option><option value="missing">Missing</option></select></label>
-      <div class="sample-list" id="sample-list"></div>
-    </section>
+      <div class="settings" aria-label="Practice settings">
+        <div class="setting-row tempo-row">
+          <span class="setting-label">Tempo</span>
+          <div class="stepper tempo-stepper" role="group" aria-label="Tempo">
+            <button type="button" data-control="tempo" data-delta="-5" aria-label="Decrease tempo by 5 BPM">−</button>
+            <output id="tempo-value">100 <small>BPM</small></output>
+            <button type="button" data-control="tempo" data-delta="5" aria-label="Increase tempo by 5 BPM">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Metronome</span>
+          <button class="toggle" id="metronome-toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"><span></span></span><span id="metronome-value">ON</span></button>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="metronome-volume">Metronome volume</label>
+          <div class="volume-control">
+            <input id="metronome-volume" type="range" min="0" max="100" step="1" value="50" aria-valuetext="50%">
+            <output id="metronome-volume-value" for="metronome-volume">50%</output>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Time signature</span>
+          <div class="feel-control" role="group" aria-label="Time signature">
+            <button type="button" data-meter="4" aria-pressed="true">4/4</button>
+            <button type="button" data-meter="3" aria-pressed="false">3/4</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Complexity</span>
+          <div class="stepper" role="group" aria-label="Complexity">
+            <button type="button" data-control="complexity" data-delta="-1" aria-label="Decrease complexity">−</button>
+            <output id="complexity-value" for="complexity-minus complexity-plus">1</output>
+            <button type="button" data-control="complexity" data-delta="1" aria-label="Increase complexity">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Pause / Repeat bars</span>
+          <div class="stepper" role="group" aria-label="Pause / Repeat bars">
+            <button type="button" data-control="pauseBars" data-delta="-1" aria-label="Decrease repeat bars">−</button>
+            <output id="pause-bars-value">1</output>
+            <button type="button" data-control="pauseBars" data-delta="1" aria-label="Increase repeat bars">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Repeat same rhythm</span>
+          <div class="stepper" role="group" aria-label="Repeat same rhythm">
+            <button type="button" data-control="repeatCount" data-delta="-1" aria-label="Decrease rhythm repeats">−</button>
+            <output id="repeat-count-value">1</output>
+            <button type="button" data-control="repeatCount" data-delta="1" aria-label="Increase rhythm repeats">+</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Feel</span>
+          <div class="feel-control" role="group" aria-label="Rhythm feel">
+            <button type="button" data-feel="straight" aria-pressed="true">Straight</button>
+            <button type="button" data-feel="swing" aria-pressed="false">Swing</button>
+            <button type="button" data-feel="shuffle" aria-pressed="false">Shuffle</button>
+            <button type="button" data-feel="jazz" aria-pressed="false">Jazz</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Rhythm sound</span>
+          <div class="feel-control sound-control" role="group" aria-label="Rhythm sound">
+            <button type="button" data-sound="warm-knock" aria-pressed="true">Warm Knock</button>
+            <button type="button" data-sound="low-pulse" aria-pressed="false">Low Pulse</button>
+            <button type="button" data-sound="soft-tone" aria-pressed="false">Soft Tone</button>
+            <button type="button" data-sound="original-click" aria-pressed="false">Original Click</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Note length</span>
+          <div class="feel-control" role="group" aria-label="Note length">
+            <button type="button" data-note-length="short" aria-pressed="true">Short</button>
+            <button type="button" data-note-length="sustained" aria-pressed="false">Sustained</button>
+          </div>
+        </div>
+      </div>
 
-    <section class="view" id="stats-view" aria-labelledby="stats-title" hidden>
-      <div class="game-heading"><div><p class="eyebrow">YOUR PROGRESS</p><h1 id="stats-title" tabindex="-1">Statistics</h1></div><button class="secondary-button compact" id="stats-back" type="button">Back</button></div>
-      <div class="stats-overview" id="stats-overview"></div>
-      <div class="stats-actions"><button class="secondary-button" id="export-stats" type="button">Export JSON</button><button class="secondary-button" id="import-stats" type="button">Import JSON</button><input id="import-file" type="file" accept="application/json,.json" hidden><button class="danger-button" id="reset-stats" type="button">Reset statistics</button></div>
-      <p class="note-line" id="stats-message" role="status" aria-live="polite"></p>
-    </section>
-
-    <section class="view" id="error-view" aria-labelledby="error-title" hidden>
-      <div class="error-panel"><p class="eyebrow">QUESTION UNAVAILABLE</p><h1 id="error-title">Training cannot start right now.</h1><p id="error-message"></p><div class="home-actions"><button class="primary-button" id="error-settings" type="button">Open settings</button><button class="secondary-button" id="error-home" type="button">Home</button></div></div>
+      <button class="play-button" id="play-button" type="button" aria-label="Start rhythm training">
+        <span class="play-icon" aria-hidden="true"></span>
+        <span id="play-label">PLAY</span>
+      </button>
     </section>
   </main>
-
-  <dialog id="settings-dialog" aria-labelledby="settings-title">
-    <form method="dialog" class="dialog-shell" id="settings-form">
-      <div class="dialog-heading"><div><p class="eyebrow">YOUR PRACTICE</p><h2 id="settings-title">Settings</h2></div><button class="icon-button" value="close" aria-label="Close settings">×</button></div>
-      <div class="settings-grid">
-        <label>Exercise mode<select name="mode"><option value="note">Single note</option><option value="scale">Scale</option><option value="chord">Chord</option></select></label>
-        <label>Instrument<select name="instrument"><option value="piano">Piano</option><option value="trumpet">Trumpet</option></select></label>
-        <label>Difficulty<select name="difficulty"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
-        <label class="range-label">Master volume <output id="volume-output">75%</output><input name="volume" type="range" min="0" max="1" step="0.01"></label>
-        <label class="wide">Scale direction<select name="scaleDirection"><option value="up">Ascending only</option><option value="up-down">Ascending and descending</option><option value="random">Random (hard)</option></select></label>
-        <label class="wide">Chord playback<select name="chordPlayback"><option value="simultaneous">Simultaneous</option><option value="arpeggio">Arpeggio</option></select></label>
-        <label class="toggle"><input name="humanize" type="checkbox"><span>Subtle timing variation</span></label>
-        <label class="toggle"><input name="volumeVariation" type="checkbox"><span>Subtle volume variation</span></label>
-        <label class="toggle wide"><input name="autoPlay" type="checkbox"><span>Play each new question automatically</span></label>
-      </div>
-      <div class="settings-footer"><button class="secondary-button" id="settings-samples" type="button">Test samples</button><button class="secondary-button" id="settings-statistics" type="button">Statistics</button><button class="secondary-button" id="open-sample-credits" type="button" aria-controls="sample-credits" aria-expanded="false">ⓘ Sample credits</button><button class="primary-button" value="close">Done</button></div>
-    </form>
-    <aside class="credits-popover" id="sample-credits" role="dialog" aria-modal="false" aria-labelledby="credits-title" hidden>
-      <div class="dialog-heading"><h2 id="credits-title">Sample credits</h2><button class="icon-button" id="close-sample-credits" type="button" aria-label="Close sample credits">×</button></div>
-      <section class="credit-entry">
-        <h3>Salamander Grand Piano V3</h3>
-        <p>Original piano recordings by Alexander Holm; SFZ mapping by kinwie. Selected note samples are converted from FLAC to MP3 for this app.</p>
-        <p>License: <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 3.0 Unported (CC BY 3.0)</a>.</p>
-        <a href="https://github.com/sfzinstruments/SalamanderGrandPiano" target="_blank" rel="noopener noreferrer">Source repository</a>
-      </section>
-      <section class="credit-entry">
-        <h3>VSCO 2 Community Edition · Trumpet</h3>
-        <p>Selected sustained trumpet samples from Versilian Studios. WAV files are converted to MP3 for this app.</p>
-        <p>License: <a href="https://github.com/sgossner/VSCO-2-CE/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">Creative Commons CC0 1.0 Universal</a>.</p>
-        <a href="https://github.com/sgossner/VSCO-2-CE/tree/master/Brass/Trumpet" target="_blank" rel="noopener noreferrer">Trumpet source folder</a>
-      </section>
-    </aside>
-  </dialog>
-
-  <aside class="debug-panel" id="debug-panel" hidden aria-label="Debug information"><div class="debug-heading"><strong>Debug</strong><button class="secondary-button compact" id="debug-test-audio" type="button">Test tone</button><button class="secondary-button compact" id="copy-debug" type="button">Copy debug information</button><button class="icon-button" id="hide-debug" type="button" aria-label="Hide debug panel" title="Hide debug panel">×</button></div><p id="debug-test-status" role="status" aria-live="polite"></p><pre id="debug-output"></pre></aside>
-  <div class="toast" id="toast" role="alert" aria-live="assertive" hidden></div>
 </body>
 </html>
